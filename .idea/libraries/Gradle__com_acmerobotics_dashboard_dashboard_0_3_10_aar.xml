@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.acmerobotics.dashboard:dashboard:0.3.10@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/799548ee3bc353b6e46ed37362b997a8/jetified-dashboard-0.3.10/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/799548ee3bc353b6e46ed37362b997a8/jetified-dashboard-0.3.10/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/799548ee3bc353b6e46ed37362b997a8/jetified-dashboard-0.3.10/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.acmerobotics.dashboard/dashboard/0.3.10/9ac025c97ab230f50a1ed1996bd8b3b1320b23a0/dashboard-0.3.10-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.acmerobotics.dashboard/dashboard/0.3.10/fcfe3f317d92c640eaca0d3e29591304355114d3/dashboard-0.3.10-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
