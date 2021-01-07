@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RingPipeline;
+package org.firstinspires.ftc.teamcode.Vision;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,7 +12,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 public class DonasTest extends LinearOpMode {
 
     OpenCvCamera phoneCam;
-    RingMainPipeline visionPipeline;
+    RingPipeline visionPipeline;
 
     @Override
     public void runOpMode()
@@ -22,7 +22,7 @@ public class DonasTest extends LinearOpMode {
 
         phoneCam.openCameraDevice();
 
-        visionPipeline = new RingMainPipeline();
+        visionPipeline = new RingPipeline();
         phoneCam.setPipeline(visionPipeline);
         phoneCam.startStreaming(320,240,OpenCvCameraRotation.UPRIGHT);
         waitForStart();

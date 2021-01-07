@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RingPipeline;
+package org.firstinspires.ftc.teamcode.Vision;
 
 import com.acmerobotics.dashboard.config.Config;
 
@@ -10,7 +10,7 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 @Config
-public class RingMainPipeline extends OpenCvPipeline {
+public class RingPipeline extends OpenCvPipeline {
 
 
 
