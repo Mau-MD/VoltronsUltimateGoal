@@ -113,6 +113,7 @@ public class VoltronsDriver extends LinearOpMode {
             }
 
             // Intake Power
+            intakePower = 0;
 
             if (gpad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0)
             {
@@ -140,7 +141,7 @@ public class VoltronsDriver extends LinearOpMode {
                 dpadArriba.reset();
             }
 
-            if (gamepad1.a && botonA.milliseconds() > 300)
+            if (gamepad1.x && botonA.milliseconds() > 300)
             {
                 positionGoal += 100;
                 botonA.reset();
@@ -152,7 +153,7 @@ public class VoltronsDriver extends LinearOpMode {
                 botonB.reset();
             }
 
-            if (gamepad1.x && botonB.milliseconds() > 300)
+            if (gamepad1.y && botonB.milliseconds() > 300)
             {
                 positionGoal = -130;
                 botonB.reset();
