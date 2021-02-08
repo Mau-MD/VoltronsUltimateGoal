@@ -21,11 +21,11 @@ public class ringDetector extends LinearOpMode {
 
     // CONSTANTS
 
-    final int X_LEFT = 1;
-    final int X_RIGHT = 2;
-    final int Y_UP = 1;
-    final int Y_MIDDLE = 2;
-    final int Y_DOWN = 3;
+    final int X_LEFT = 120;
+    final int X_RIGHT = 150;
+    final int Y_UP = 150;
+    final int Y_MIDDLE = 165;
+    final int Y_DOWN = 172;
 
 
 
