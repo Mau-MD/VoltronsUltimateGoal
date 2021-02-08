@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @TeleOp (name = "Driver", group = "Driver")
 public class VoltronsDriver extends LinearOpMode {
@@ -44,7 +45,6 @@ public class VoltronsDriver extends LinearOpMode {
         Motor backRight= new Motor(hardwareMap, "br", Motor.GoBILDA.RPM_117);
 
         Motor intake = new Motor(hardwareMap, "in", Motor.GoBILDA.RPM_312);
-
         frontLeft.setRunMode(Motor.RunMode.RawPower);
         frontRight.setRunMode(Motor.RunMode.RawPower);
         backLeft.setRunMode(Motor.RunMode.RawPower);

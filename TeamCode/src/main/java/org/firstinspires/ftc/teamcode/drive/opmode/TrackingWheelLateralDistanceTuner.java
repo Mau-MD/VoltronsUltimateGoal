@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
  *
  * 2. Make a mark on the bot (with a piece of tape or sharpie or however you wish) and make an
  * similar mark right below the indicator on your bot. This will be your reference point to
- * ensure you've turned exactly 360°.
+ * ensure you've turned exactly 360.
  *
  * 3. Although not entirely necessary, having the bot's pose being drawn in dashbooard does help
  * identify discrepancies in the LATERAL_DISTANCE value. To access the dashboard,
@@ -97,7 +97,7 @@ public class TrackingWheelLateralDistanceTuner extends CommandOpMode {
                 + "located in the comments of the opmode file.");
         telemetry.addLine("Press play to begin the tuning routine.");
         telemetry.addLine("");
-        telemetry.addLine("Press Y/△ to stop the routine.");
+        telemetry.addLine("Press Y/N to stop the routine.");
         telemetry.update();
 
         gamepad = new GamepadEx(gamepad1);
@@ -129,13 +129,13 @@ public class TrackingWheelLateralDistanceTuner extends CommandOpMode {
             telemetry.addLine("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
             telemetry.addLine("Raw Heading (deg): " + Math.toDegrees(heading));
             telemetry.addLine();
-            telemetry.addLine("Press Y/△ to conclude routine");
+            telemetry.addLine("Press Y/N to conclude routine");
             telemetry.update();
         }, drive)
             .deadlineWith(new WaitUntilCommand(() -> turningFinished))
             .whenFinished(() -> {
                 telemetry.clearAll();
-                telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
+                telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + ".");
                 telemetry.addLine("Effective LATERAL_DISTANCE: " +
                         (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * StandardTrackingWheelLocalizer.LATERAL_DISTANCE);
 
