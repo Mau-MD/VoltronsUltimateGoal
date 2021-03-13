@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
@@ -40,6 +41,7 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.rpmToVelocity;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
+@Disabled
 @Config
 @Autonomous(group = "drive")
 public class AutomaticFeedforwardTuner extends CommandOpMode {

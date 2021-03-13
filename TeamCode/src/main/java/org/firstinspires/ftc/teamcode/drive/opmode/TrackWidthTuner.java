@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
@@ -29,6 +30,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
+@Disabled
 @Config
 @Autonomous(group = "drive")
 public class TrackWidthTuner extends CommandOpMode {

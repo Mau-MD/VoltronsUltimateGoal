@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.commands.TurnCommand;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
+@Disabled
 @Config
 @Autonomous(group = "drive")
 public class TurnTest extends CommandOpMode {

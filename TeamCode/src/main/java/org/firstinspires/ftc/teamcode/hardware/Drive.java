@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import static org.firstinspires.ftc.teamcode.functions.UtilFunctions.*;
+import static org.firstinspires.ftc.teamcode.Voltrons.Vision.functions.UtilFunctions.*;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;

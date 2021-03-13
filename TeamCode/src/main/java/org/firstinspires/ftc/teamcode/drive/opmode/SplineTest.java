@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.commands.TrajectoryFollowerCommand;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
+@Disabled
 @Autonomous(group = "drive")
 public class SplineTest extends CommandOpMode {
 
