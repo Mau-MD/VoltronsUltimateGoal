@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.Voltrons.Path;
 
 import org.ejml.simple.SimpleMatrix;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.Arrays;
 
@@ -10,10 +9,21 @@ public class CubicCoefficients {
 
     static int matrixSize;
 
+    /**
+     * Object that requires the numer of functions to calculate the return matrix size
+     * @param functions
+     */
     public CubicCoefficients(int functions) {
-        matrixSize = 4 * (functions - 1);
+        matrixSize = 4 * (functions);
     }
 
+    /**
+     * Returns the coefficients of a curve given a point
+     * @param function number of functions
+     * @param x x point value
+     * @param y y point value
+     * @return Two vectors, one that has the coefficients and other that stores y values
+     */
     public VectorPair curve(int function, double x, double y) {
         // a + bx + cx^2 + dx^3
         double a, b, c, d;
@@ -33,6 +43,13 @@ public class CubicCoefficients {
         return new VectorPair(answer, y);
     }
 
+    /**
+     *  Returns the coefficients that satisfies start and final slope continuity.
+     * @param function number of functions
+     * @param x x point value
+     * @param slope slope value
+     * @return Two vectors, one that has the coefficients and other that stores y values
+     */
     public VectorPair slope(int function, double x, double slope) {
         double b1, c1, d1;
         b1 = 1;
@@ -49,6 +66,12 @@ public class CubicCoefficients {
         return new VectorPair(answer, slope);
     }
 
+    /**
+     * Returns the coefficients that satisfies C^1 continuity: Slope Match
+     * @param function number of functions
+     * @param x x point value
+     * @return Two vectors, one that has the coefficients and other that stores y values
+     */
     public VectorPair slopeMatch(int function, double x) {
         double b1, c1, d1, b2, c2, d2;
         b1 = 1;
@@ -72,6 +95,12 @@ public class CubicCoefficients {
         return new VectorPair(answer, 0);
     }
 
+    /**
+     *  Returns the coefficients that satisfies C^2 continuity: Curvature Match
+     * @param function number of functions
+     * @param x x point value
+     * @return Two vectors, one that has the coefficients and other that stores y values
+     */
     public VectorPair curvatureMatch(int function, double x) {
         double c1, d1, c2, d2;
         c1 = 2;

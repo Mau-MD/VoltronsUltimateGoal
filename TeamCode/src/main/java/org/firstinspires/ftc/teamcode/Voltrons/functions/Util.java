@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Voltrons.Vision.functions;
+package org.firstinspires.ftc.teamcode.Voltrons.functions;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-public class UtilFunctions {
+public class Util {
 
     /**
      * Pausa el programa por un determinado tiempo en milisegundos
