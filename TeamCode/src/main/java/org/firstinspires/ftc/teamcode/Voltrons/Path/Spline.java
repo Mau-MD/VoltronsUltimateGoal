@@ -15,6 +15,12 @@ public class Spline {
     double[] prefixSum;
     double totalLength;
 
+    /**
+     * Initializes a spline objects given an array of points, the beginning slope and the end slope
+     * @param points array of points
+     * @param slope1 beginning slope
+     * @param slope2 end slope
+     */
     public Spline(Point[] points, double slope1, double slope2) {
         SimpleMatrix coeff = SplineGenerator.getSplineFunctions(points, slope1, slope2);
         List<CubicFunction> functions = new ArrayList<>();
@@ -29,6 +35,10 @@ public class Spline {
         totalLength = getTotalLength();
     }
 
+    /**
+     * Returns the total length of the spline
+     * @return total length
+     */
     private double getTotalLength() {
         double totalLength = 0;
         prefixSum[0] = 0;
@@ -42,6 +52,11 @@ public class Spline {
         return totalLength;
     }
 
+    /**
+     * Gets the function number based on a distance
+     * @param x distance
+     * @return number of function
+     */
     private Pair<CubicFunction, Integer> getFunction(double x) {
         for (int i = 0; i < functions.size(); i ++) {
             /*
@@ -56,6 +71,14 @@ public class Spline {
         return new Pair<>(functions.get(functions.size()-1), functions.size()-1);
     }
 
+    /**
+     * Returns the coordinates of a function given a distance. Binary search oh yeah!
+     * @param function function
+     * @param distance current distance
+     * @param _low lower bound of search aka. starting point
+     * @param _high upper bound of search aka. final point
+     * @return a pair of x and y coordinates of the function
+     */
     private Point getCoordinates(CubicFunction function, double distance, double _low, double _high) {
         double low = _low, high = _high, mid;
         while (high - low >= 1e-9) {
@@ -70,6 +93,11 @@ public class Spline {
         return new Point(low, function.evaluate(low));
     }
 
+    /**
+     * Gets the current angle of the function given a distance
+     * @param x current distance
+     * @return current angle
+     */
     public double getHeading(double x) {
 
         Pair<CubicFunction, Integer> currentFunction = getFunction(x);
