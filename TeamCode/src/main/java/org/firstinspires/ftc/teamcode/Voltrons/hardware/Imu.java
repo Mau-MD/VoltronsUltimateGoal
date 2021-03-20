@@ -42,4 +42,10 @@ public class Imu {
         return error;
     }
 
+    public static double normalizeSplineAngle(double angle) {
+        double newAngle = angle;
+        newAngle %= 360;
+        return newAngle;
+    }
+
 }

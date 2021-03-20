@@ -11,7 +11,7 @@ import java.util.List;
 public class Spline {
 
     List<CubicFunction> functions;
-    Point[] points;
+    public Point[] points;
     double[] prefixSum;
     double totalLength;
 

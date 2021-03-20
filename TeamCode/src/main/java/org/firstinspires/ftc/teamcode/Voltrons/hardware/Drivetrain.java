@@ -4,10 +4,10 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Voltrons.Constants;
+import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 
 public class Drivetrain {
 
@@ -123,7 +123,7 @@ public class Drivetrain {
      */
     public void driveEncoderGyro(double[] power, double angle, double goal) {
         // Quiero avanzar x cm desde donde sea que este
-        double relativePosition = 0;
+        double relativePosition;
         double startingPosition = (backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0;
         double ticksGoal = Drivetrain.cmToTicks(goal);
 
@@ -185,6 +185,39 @@ public class Drivetrain {
         }
 
         idle();
+    }
+
+    /**
+     * follows the path of a predefined spline
+     * @param spline spline
+     * @param power motor's power
+     */
+    public void followPath(Spline spline, double power) {
+        // Todo en centimetros
+        double relativePosition;
+        double startingPosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0);
+        double startingHeading = spline.getHeading(0);
+
+        setOrientation(power, startingHeading);
+
+        // Should have really low power to avoid overshooting
+        while (true) {
+
+            relativePosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0) - startingPosition;
+            double newHeading = Imu.normalizeSplineAngle(spline.getHeading(relativePosition));
+            double angleError = Imu.getError(imu.getAngleNormalized(), newHeading);
+            double angleCorrection = orientationPIDF.calculate(angleError, 0);
+
+            frontLeft.setPower(power + angleCorrection); // Maybe it should change depending of direction
+            frontRight.setPower(power - angleCorrection);
+            backLeft.setPower(power + angleCorrection);
+            backRight.setPower(power - angleCorrection);
+
+            if (relativePosition > spline.points[spline.points.length-1].x)break;
+        }
+
+        idle();
+
     }
 
     /**
