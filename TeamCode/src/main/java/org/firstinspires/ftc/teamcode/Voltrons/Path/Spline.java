@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.Path;
 import android.util.Pair;
 
 import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.teamcode.Voltrons.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,5 +116,15 @@ public class Spline {
         //System.out.println("Absolute X: " + absoluteXCoordinate);
         double slope = currentFunction.first.getSlope(currentCoordinate.x);
         return Math.toDegrees(Math.atan(slope));
+    }
+
+
+    /**
+     * Converts computer-based coordinates to math-based coordinates
+     * @param coordinate computer-based coordinate (x right, y down)
+     * @return math-based coordinates (x right, y up)
+     */
+    public static Point toMathCoordinates(Point coordinate) {
+        return new Point(coordinate.x, Constants.FIELD_HEIGHT_CM - coordinate.y);
     }
 }

@@ -1,0 +1,105 @@
+package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous.Test;
+
+import android.net.wifi.aware.PublishConfig;
+
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
+import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.Launcher;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.WoobleArm;
+
+@TeleOp(name="Spline Test", group="Tests")
+public class SplineTest extends LinearOpMode {
+
+    public static double wobbleHandMin = 0;
+    public static double wobbleHandMax = 180; // Degrees
+    public static double wobbleArmMin = 0;
+    public static double wobbleArmMax = 270;
+
+    public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
+    public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
+    public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
+    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
+
+
+    @Override
+    public void runOpMode()
+    {
+        // Drivetrain Motors
+        Motor frontLeft = new Motor(hardwareMap, "fl", Motor.GoBILDA.RPM_117);
+        Motor frontRight = new Motor(hardwareMap, "fr", Motor.GoBILDA.RPM_117);
+        Motor backLeft = new Motor(hardwareMap, "bl", Motor.GoBILDA.RPM_117);
+        Motor backRight= new Motor(hardwareMap, "br", Motor.GoBILDA.RPM_117);
+
+        // Wobble Motors
+        Motor wobbleArm = new Motor(hardwareMap, "wa");
+        SimpleServo wobbleHand = new SimpleServo(hardwareMap, "wh", wobbleHandMin, wobbleHandMax);
+
+        // Intake and movement Motors
+        Motor intakeMotor = new Motor(hardwareMap, "in");
+        CRServo beltDown = hardwareMap.crservo.get("bd");
+        CRServo betlUp = hardwareMap.crservo.get("bu");
+
+        // Launcher Motors
+        Motor leftLauncher = new Motor(hardwareMap, "ll", Motor.GoBILDA.RPM_312);
+        Motor rightLauncher = new Motor(hardwareMap, "rl", Motor.GoBILDA.RPM_312);
+
+        // Configure Drivetrain Motors
+        frontLeft.setRunMode(Motor.RunMode.RawPower);
+        frontRight.setRunMode(Motor.RunMode.RawPower);
+        backLeft.setRunMode(Motor.RunMode.RawPower);
+        backRight.setRunMode(Motor.RunMode.RawPower);
+
+        frontLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        frontLeft.setInverted(true);
+        frontRight.setInverted(true);
+        backLeft.setInverted(false);
+        backRight.setInverted(false);
+
+
+        PIDFController wobblePIDF = new PIDFController(wArm.p, wArm.i, wArm.d, wArm.f);
+        PIDFController gyroPIDF = new PIDFController(gyro.p, gyro.i, gyro.d, gyro.f);
+        PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
+        PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
+
+        MecanumDrive mecanum = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
+        Belt belt = new Belt(beltDown, betlUp);
+        Intake intake = new Intake(intakeMotor);
+        Launcher launcher = new Launcher(leftLauncher, rightLauncher);
+        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 1000);
+
+
+        waitForStart();
+
+        if(opModeIsActive())
+        {
+            Point[] first = new Point[] {
+                    Spline.toMathCoordinates(new Point(166,304)),
+                    Spline.toMathCoordinates(new Point(186, 271)),
+                    Spline.toMathCoordinates(new Point(219, 268)),
+                    Spline.toMathCoordinates(new Point(225, 218))
+            };
+
+            Spline firstSpline = new Spline(first, 1,-1);
+
+        }
+    }
+}
+
