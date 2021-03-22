@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.hardware;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,10 +12,10 @@ import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 
 public class Drivetrain {
 
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor backLeft;
-    private DcMotor backRight;
+    private Motor frontLeft;
+    private Motor frontRight;
+    private Motor backLeft;
+    private Motor backRight;
     private Imu imu;
 
     private PIDFController orientationPIDF;
@@ -29,7 +30,7 @@ public class Drivetrain {
      * @param backRight backRight motor
      * @param imu {@link BNO055IMU} IMU
      */
-    public Drivetrain(DcMotor frontLeft, DcMotor frontRight, DcMotor backLeft, DcMotor backRight, BNO055IMU imu) {
+    public Drivetrain(Motor frontLeft, Motor frontRight, Motor backLeft, Motor backRight, BNO055IMU imu) {
         this.frontLeft = frontLeft;
         this.frontRight = frontRight;
         this.backLeft = backLeft;
@@ -41,10 +42,10 @@ public class Drivetrain {
      * Stops all the 4 drivetrain motors
      */
     public void idle() {
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
+        frontLeft.set(0);
+        frontRight.set(0);
+        backLeft.set(0);
+        backRight.set(0);
     }
 
     /**
@@ -80,10 +81,10 @@ public class Drivetrain {
         double correction = 0;
         while (currentTime.milliseconds() < time) {
 
-            frontLeft.setPower(power[0] + correction);
-            frontRight.setPower(power[1] - correction);
-            backLeft.setPower(power[2] + correction);
-            backRight.setPower(power[3] - correction);
+            frontLeft.set(power[0] + correction);
+            frontRight.set(power[1] - correction);
+            backLeft.set(power[2] + correction);
+            backRight.set(power[3] - correction);
 
             double error = Imu.getError(imu.getAngleNormalized(), angle);
             correction = gyroPIDF.calculate(error,0);
@@ -135,10 +136,10 @@ public class Drivetrain {
             double angleError = Imu.getError(imu.getAngleNormalized(), angle);
             double angleCorrection = orientationPIDF.calculate(angleError, 0);
 
-            frontLeft.setPower(encoderOutput * power[0] + angleCorrection);
-            frontRight.setPower(encoderOutput * power[1] - angleCorrection);
-            backLeft.setPower(encoderOutput * power[2] + angleCorrection);
-            backRight.setPower(encoderOutput * power[3] - angleCorrection);
+            frontLeft.set(encoderOutput * power[0] + angleCorrection);
+            frontRight.set(encoderOutput * power[1] - angleCorrection);
+            backLeft.set(encoderOutput * power[2] + angleCorrection);
+            backRight.set(encoderOutput * power[3] - angleCorrection);
 
             if (Math.abs(encoderOutput) < 0.2)break;
         }
@@ -176,10 +177,10 @@ public class Drivetrain {
             double error = Imu.getError(imu.getAngleNormalized(), angle);
             double correction =  orientationPIDF.calculate(error,0);
 
-            frontLeft.setPower(-power * correction);
-            frontRight.setPower(power * correction);
-            backLeft.setPower(-power * correction);
-            backRight.setPower(power * correction);
+            frontLeft.set(-power * correction);
+            frontRight.set(power * correction);
+            backLeft.set(-power * correction);
+            backRight.set(power * correction);
 
             if (Math.abs(error) < 1.0) break;
         }
@@ -208,10 +209,10 @@ public class Drivetrain {
             double angleError = Imu.getError(imu.getAngleNormalized(), newHeading);
             double angleCorrection = orientationPIDF.calculate(angleError, 0);
 
-            frontLeft.setPower(power + angleCorrection); // Maybe it should change depending of direction
-            frontRight.setPower(power - angleCorrection);
-            backLeft.setPower(power + angleCorrection);
-            backRight.setPower(power - angleCorrection);
+            frontLeft.set(power + angleCorrection); // Maybe it should change depending of direction
+            frontRight.set(power - angleCorrection);
+            backLeft.set(power + angleCorrection);
+            backRight.set(power - angleCorrection);
 
             if (relativePosition > spline.points[spline.points.length-1].x)break;
         }

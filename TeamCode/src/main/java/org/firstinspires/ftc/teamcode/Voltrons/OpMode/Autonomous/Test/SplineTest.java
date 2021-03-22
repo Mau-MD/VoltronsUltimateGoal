@@ -9,6 +9,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -17,6 +19,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
+import org.firstinspires.ftc.teamcode.Voltrons.hardware.Imu;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.WoobleArm;
@@ -57,6 +61,18 @@ public class SplineTest extends LinearOpMode {
         Motor leftLauncher = new Motor(hardwareMap, "ll", Motor.GoBILDA.RPM_312);
         Motor rightLauncher = new Motor(hardwareMap, "rl", Motor.GoBILDA.RPM_312);
 
+        // Imu
+        BNO055IMU imu;
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
         // Configure Drivetrain Motors
         frontLeft.setRunMode(Motor.RunMode.RawPower);
         frontRight.setRunMode(Motor.RunMode.RawPower);
@@ -79,11 +95,11 @@ public class SplineTest extends LinearOpMode {
         PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
         PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
 
-        MecanumDrive mecanum = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
+        Drivetrain mecanum = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
-        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 1000);
+        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 340);
 
 
         waitForStart();
@@ -91,14 +107,14 @@ public class SplineTest extends LinearOpMode {
         if(opModeIsActive())
         {
             Point[] first = new Point[] {
-                    Spline.toMathCoordinates(new Point(166,304)),
-                    Spline.toMathCoordinates(new Point(186, 271)),
-                    Spline.toMathCoordinates(new Point(219, 268)),
-                    Spline.toMathCoordinates(new Point(225, 218))
+                    new Point(166,56),
+                    new Point(175, 89),
+                    new Point(177, 95),
+                    new Point(210, 150),
+                    new Point(220,170)
             };
 
-            Spline firstSpline = new Spline(first, 1,-1);
-
+            Spline spline = new Spline(first, 5,5);
         }
     }
 }

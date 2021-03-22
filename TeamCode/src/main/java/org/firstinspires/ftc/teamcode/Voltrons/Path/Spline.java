@@ -127,4 +127,5 @@ public class Spline {
     public static Point toMathCoordinates(Point coordinate) {
         return new Point(coordinate.x, Constants.FIELD_HEIGHT_CM - coordinate.y);
     }
+
 }
