@@ -1,12 +1,18 @@
 package org.firstinspires.ftc.teamcode.Voltrons.hardware;
 
+import android.widget.LinearLayout;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Voltrons.Constants;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 
@@ -22,6 +28,9 @@ public class Drivetrain {
     private PIDFController gyroPIDF;
     private PIDFController encoderPIDF;
 
+    private FtcDashboard dashboard;
+    private TelemetryPacket packet;
+
     /**
      * Initializes drivetrain class. It requires 4 dc motors and a IMU object
      * @param frontLeft frontLeft motor
@@ -36,6 +45,11 @@ public class Drivetrain {
         this.backLeft = backLeft;
         this.backRight = backRight;
         this.imu = new Imu(imu);
+    }
+
+    public void setDashboard(FtcDashboard dashboard) {
+        this.dashboard = dashboard;
+        packet = new TelemetryPacket();
     }
 
     /**
@@ -125,21 +139,30 @@ public class Drivetrain {
     public void driveEncoderGyro(double[] power, double angle, double goal) {
         // Quiero avanzar x cm desde donde sea que este
         double relativePosition;
-        double startingPosition = (backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0;
+        double startingLeftPosition = -backLeft.getCurrentPosition();
+        double startingRightPosition = backRight.getCurrentPosition();
         double ticksGoal = Drivetrain.cmToTicks(goal);
 
         // Relative Ticks
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
 
-            relativePosition = ((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0) - startingPosition;
+            relativePosition = ((-backLeft.getCurrentPosition() - startingLeftPosition) + (backRight.getCurrentPosition() - startingRightPosition)) / 2.0;
             double encoderOutput = encoderPIDF.calculate(relativePosition, ticksGoal);
             double angleError = Imu.getError(imu.getAngleNormalized(), angle);
-            double angleCorrection = orientationPIDF.calculate(angleError, 0);
+            double angleCorrection = gyroPIDF.calculate(angleError, 0);
 
-            frontLeft.set(encoderOutput * power[0] + angleCorrection);
-            frontRight.set(encoderOutput * power[1] - angleCorrection);
-            backLeft.set(encoderOutput * power[2] + angleCorrection);
-            backRight.set(encoderOutput * power[3] - angleCorrection);
+            frontLeft.set(encoderOutput * power[0] - angleCorrection);
+            frontRight.set(encoderOutput * power[1] + angleCorrection);
+            backLeft.set(encoderOutput * power[2] - angleCorrection);
+            backRight.set(encoderOutput * power[3] + angleCorrection);
+
+            packet.put("Left Position", (-backLeft.getCurrentPosition() - startingLeftPosition));
+            packet.put("Right Position", (backRight.getCurrentPosition() - startingRightPosition));
+            packet.put("Encoder Output", encoderOutput);
+            packet.put("Angle Error", angleError);
+            packet.put("Correction Output", angleCorrection);
+
+            dashboard.sendTelemetryPacket(packet);
 
             if (Math.abs(encoderOutput) < 0.2)break;
         }
@@ -150,7 +173,7 @@ public class Drivetrain {
      * Sets the gyroPIDF to some specific coeffs
      * @param orientationPIDF pidf controller
      */
-    public void setOrientationPIDF(PIDController orientationPIDF) {
+    public void setOrientationPIDF(PIDFController orientationPIDF) {
         this.orientationPIDF = orientationPIDF;
     }
 
@@ -160,7 +183,7 @@ public class Drivetrain {
      * @param angle angle to turn
      * @param pidf pidf controller
      */
-    public void setOrientation(double power, double angle, PIDController pidf) {
+    public void setOrientation(double power, double angle, PIDFController pidf) {
         setOrientationPIDF(pidf);
         setOrientation(power,angle);
     }
@@ -172,19 +195,41 @@ public class Drivetrain {
      */
     public void setOrientation(double power, double angle) {
 
-        while (true) {
+        ElapsedTime zeroErrorTime = new ElapsedTime();
+        zeroErrorTime.reset();
+        boolean firstZero = false;
+
+        while (!Thread.currentThread().isInterrupted()) {
 
             double error = Imu.getError(imu.getAngleNormalized(), angle);
             double correction =  orientationPIDF.calculate(error,0);
 
-            frontLeft.set(-power * correction);
-            frontRight.set(power * correction);
-            backLeft.set(-power * correction);
-            backRight.set(power * correction);
+            frontLeft.set(power * correction);
+            frontRight.set(-power * correction);
+            backLeft.set(power * correction);
+            backRight.set(-power * correction);
 
-            if (Math.abs(error) < 1.0) break;
+            packet.put("Angle Error", error);
+            packet.put("Correction Output", correction);
+
+            dashboard.sendTelemetryPacket(packet);
+
+            if (Math.abs(error) <= 0.6)
+            {
+                if (!firstZero){
+                    firstZero = true;
+                    zeroErrorTime.reset();
+                }
+                if (zeroErrorTime.milliseconds() > 1000) {
+                    break;
+                }
+            }
+            else
+            {
+                firstZero = false;
+            }
+             // Que se cumplan una serie de segundos y luego quebrar
         }
-
         idle();
     }
 
@@ -202,7 +247,7 @@ public class Drivetrain {
         setOrientation(power, startingHeading);
 
         // Should have really low power to avoid overshooting
-        while (true) {
+        do {
 
             relativePosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0) - startingPosition;
             double newHeading = Imu.normalizeSplineAngle(spline.getHeading(relativePosition));
@@ -214,8 +259,15 @@ public class Drivetrain {
             backLeft.set(power + angleCorrection);
             backRight.set(power - angleCorrection);
 
-            if (relativePosition > spline.points[spline.points.length-1].x)break;
-        }
+
+            packet.put("Position", relativePosition);
+            packet.put("New Heading", newHeading);
+            packet.put("Angle Error", angleError);
+            packet.put("Correction Output", angleCorrection);
+
+            dashboard.sendTelemetryPacket(packet);
+
+        } while (!(relativePosition > spline.points[spline.points.length - 1].x) && !Thread.currentThread().isInterrupted());
 
         idle();
 
@@ -227,7 +279,7 @@ public class Drivetrain {
      * @return motor ticks
      */
     public static double cmToTicks(double cm) {
-        return cm * Constants.TICKS_PER_REVOLUTION / Constants.WHEEl_DIAMETER_CM;
+        return cm * Constants.TICKS_PER_REVOLUTION / Constants.WHEEL_CIRCUMFERENCE_CM;
     }
 
     /**
@@ -236,7 +288,7 @@ public class Drivetrain {
      * @return motor ticks
      */
     public static double ticksToCm(double ticks) {
-        return ticks * Constants.WHEEl_DIAMETER_CM / Constants.TICKS_PER_REVOLUTION;
+        return ticks * Constants.WHEEL_CIRCUMFERENCE_CM / Constants.TICKS_PER_REVOLUTION;
     }
 
 }

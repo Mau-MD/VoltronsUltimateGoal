@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous.Test;
 
 import android.net.wifi.aware.PublishConfig;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
@@ -25,6 +26,7 @@ import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.WoobleArm;
 
+@Config
 @TeleOp(name="Spline Test", group="Tests")
 public class SplineTest extends LinearOpMode {
 
@@ -95,7 +97,7 @@ public class SplineTest extends LinearOpMode {
         PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
         PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
 
-        Drivetrain mecanum = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
+        Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
@@ -115,6 +117,7 @@ public class SplineTest extends LinearOpMode {
             };
 
             Spline spline = new Spline(first, 5,5);
+            drive.followPath(spline,0.5);
         }
     }
 }
