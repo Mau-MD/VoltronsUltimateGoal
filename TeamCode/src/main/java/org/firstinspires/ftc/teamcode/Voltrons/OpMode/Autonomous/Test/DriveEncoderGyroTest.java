@@ -32,7 +32,7 @@ public class DriveEncoderGyroTest extends LinearOpMode {
     public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
     public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
     public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
+    public static PIDFCoefficients encoder = new PIDFCoefficients(0.0007,0,0.001,0);
 
 
     @Override
@@ -103,6 +103,8 @@ public class DriveEncoderGyroTest extends LinearOpMode {
 
         waitForStart();
 
+        // TODO: Separate Front and Strafe. Time if anything goes wrong. Add set orientation every movement.
+        // TODO: Different PIDF for strafing?
         while (opModeIsActive()) {
 
             turnPIDF.setPIDF(turn.p, turn.i, turn.d, turn.f);
@@ -112,7 +114,7 @@ public class DriveEncoderGyroTest extends LinearOpMode {
             if (gamepad1.a && aButton.milliseconds() > 100) {
                 drive.driveEncoderGyro(new double[] {1,1,1,1}, 180, 100, gyroPIDF, encoderPIDF);
             } else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-1,-1,-1,-1}, 180, 100, gyroPIDF, encoderPIDF);
+                drive.driveEncoderGyro(new double[] {-1,-1,-1,-1}, 180, -100, gyroPIDF, encoderPIDF);
             } else if (gamepad1.x && aButton.milliseconds() > 100) {
                 drive.driveEncoderGyro(new double[] {1,-1,-1,1}, 180, 100, gyroPIDF, encoderPIDF);
             } else if (gamepad1.y && aButton.milliseconds() > 100) {
