@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous.Test;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -16,6 +17,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
@@ -36,6 +39,7 @@ public class TurnTest extends LinearOpMode {
     public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
     public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
 
+    public static double iLimit = 1;
 
     @Override
     public void runOpMode()
@@ -93,6 +97,8 @@ public class TurnTest extends LinearOpMode {
         PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
         PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
 
+        PID pid = new PID(turn.p, turn.i, turn.d, 1);
+
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
@@ -109,13 +115,15 @@ public class TurnTest extends LinearOpMode {
         while(opModeIsActive())
         {
             // Pull request
-            turnPIDF.setPIDF(turn.p, turn.i, turn.d, turn.f);
+            pid.setCoeff(new PIDCoeff(turn.p, turn.i, turn.d));
+            pid.setILimit(iLimit);
+
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,270, turnPIDF);
+                drive.setOrientation(0.8,270, pid);
                 aButton.reset();
             }
             else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,180, turnPIDF);
+                drive.setOrientation(0.8,180, pid);
             }
         }
     }

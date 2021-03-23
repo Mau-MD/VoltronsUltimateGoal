@@ -1,20 +1,15 @@
 package org.firstinspires.ftc.teamcode.Voltrons.hardware;
 
-import android.widget.LinearLayout;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Voltrons.Constants;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
 
 public class Drivetrain {
 
@@ -27,6 +22,8 @@ public class Drivetrain {
     private PIDFController orientationPIDF;
     private PIDFController gyroPIDF;
     private PIDFController encoderPIDF;
+
+    private PID orientationPID;
 
     private FtcDashboard dashboard;
     private TelemetryPacket packet;
@@ -177,6 +174,10 @@ public class Drivetrain {
         this.orientationPIDF = orientationPIDF;
     }
 
+    public void setOrientationPID(PID orientationPID) {
+        this.orientationPID = orientationPID;
+    }
+
     /**
      * Turns the robot to an specific angle
      * @param power motor's power
@@ -188,6 +189,52 @@ public class Drivetrain {
         setOrientation(power,angle);
     }
 
+    public void setOrientation(double power, double angle, PID pid) {
+        setOrientationPID(pid);
+        setOrientationC(power, angle);
+    }
+
+
+    /**
+     * Turns the robot to an specific angle. It requires to have set a orientationPIDF controller.
+     * @param power
+     * @param angle
+     */
+    public void setOrientationC(double power, double angle) {
+
+        ElapsedTime zeroErrorTime = new ElapsedTime();
+        zeroErrorTime.reset();
+        boolean firstZero = false;
+
+        while (!Thread.currentThread().isInterrupted()) {
+
+            double error = Imu.getError(imu.getAngleNormalized(), angle);
+            double correction =  orientationPID.calculate(error,0);
+
+            frontLeft.set(power * correction);
+            frontRight.set(-power * correction);
+            backLeft.set(power * correction);
+            backRight.set(-power * correction);
+
+            packet.put("Angle", imu.getAngleNormalized());
+            packet.put("Error", error);
+            packet.put("Output", correction);
+            packet.put("pContrib", orientationPID.getPContrib());
+            packet.put("iContrib", orientationPID.getIContrib());
+            packet.put("dContrib", orientationPID.getDContrib());
+            packet.put("setPoint", orientationPID.getSetPoint());
+
+            dashboard.sendTelemetryPacket(packet);
+
+            if (Math.abs(error) <= 0.6)
+            {
+                idle();
+                break;
+            }
+            // Que se cumplan una serie de segundos y luego quebrar
+        }
+        idle();
+    }
     /**
      * Turns the robot to an specific angle. It requires to have set a orientationPIDF controller.
      * @param power
