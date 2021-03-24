@@ -8,7 +8,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
-import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 
 public class WoobleArm {
 
@@ -18,7 +18,6 @@ public class WoobleArm {
     double min, max;
 
     PID pid;
-    double iLimit;
     double goal;
     double armMin, armMax;
     boolean active = true;
@@ -112,17 +111,12 @@ public class WoobleArm {
      * @param kd derivative constant
      * @param ki integral constant
      */
-    public void setPID(double kp, double kd, double ki) {
-        pid.setCoeff(new PIDCoeff(kp,kd,ki));
+    public void setPID(double kp, double kd, double ki, double iLimit) {
+        pid.setCoeff(new PIDICoeff(kp,kd,ki,iLimit));
     }
 
-    public void setPID(PIDCoeff coeff) {
+    public void setPIDI(PIDICoeff coeff) {
         pid.setCoeff(coeff);
-    }
-
-    public void setILimit(double iLimit) {
-        pid.setILimit(iLimit);
-        this.iLimit = iLimit;
     }
 
     public void setDashboard(FtcDashboard dashboard) {
@@ -195,12 +189,8 @@ public class WoobleArm {
      * Get the current PIDF Coeffs
      * @return an array of four elements with the Coeffs
      */
-    public PIDCoeff getPID() {
+    public PIDICoeff getPID() {
         return pid.getCoeff();
-    }
-
-    public double getILimit() {
-        return pid.getILimit();
     }
 
     public double getError() {

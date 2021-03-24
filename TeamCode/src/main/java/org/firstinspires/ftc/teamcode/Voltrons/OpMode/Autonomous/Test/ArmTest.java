@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
-import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
@@ -31,8 +31,7 @@ public class ArmTest extends LinearOpMode {
     public static double A = 50;
     public static double B = 650;
 
-    public static PIDCoeff armCoeff = new PIDCoeff(0.0008,0,0.0001);
-    public static double iLimit = 0;
+    public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001,0);
 
     @Override
     public void runOpMode() {
@@ -84,7 +83,7 @@ public class ArmTest extends LinearOpMode {
         backRight.setInverted(false);
 
         wobbleArm.resetEncoder();
-        PID wobblePID = new PID(armCoeff, iLimit);
+        PID wobblePID = new PID(armCoeff);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
@@ -105,8 +104,7 @@ public class ArmTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            arm.setPID(armCoeff);
-            arm.setILimit(iLimit);
+            arm.setPIDI(armCoeff);
             arm.setArmRange(wobbleArmMin, wobbleArmMax);
             arm.setRange(wobbleHandMin, wobbleHandMax);
 

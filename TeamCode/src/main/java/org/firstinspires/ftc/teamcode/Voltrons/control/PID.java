@@ -6,8 +6,7 @@ public class PID {
 
     ElapsedTime elapsedTime = new ElapsedTime();
 
-    public PIDCoeff coeff;
-    double iLimit;
+    public PIDICoeff coeff;
 
     double error;
     double lastTimeStamp;
@@ -21,8 +20,7 @@ public class PID {
 
     public PID(double kP, double kI, double kD, double iLimit) {
 
-        coeff = new PIDCoeff(kP, kI, kD);
-        this.iLimit = iLimit;
+        coeff = new PIDICoeff(kP, kI, kD, iLimit);
 
         elapsedTime.reset();
 
@@ -37,10 +35,9 @@ public class PID {
         dContrib = 0;
     }
 
-    public PID(PIDCoeff coeff, double iLimit) {
+    public PID(PIDICoeff coeff) {
 
         this.coeff = coeff;
-        this.iLimit = iLimit;
 
         elapsedTime.reset();
 
@@ -81,12 +78,8 @@ public class PID {
         coeff.kI = kI;
     }
 
-    public void setCoeff(PIDCoeff coeff) {
+    public void setCoeff(PIDICoeff coeff) {
         this.coeff = coeff;
-    }
-
-    public void setILimit(double iLimit) {
-        this.iLimit = iLimit;
     }
 
     public void setSetPoint(double sP) {
@@ -111,12 +104,8 @@ public class PID {
 
     public double getError() { return error; }
 
-    public PIDCoeff getCoeff() {
+    public PIDICoeff getCoeff() {
         return coeff;
-    }
-
-    public double getILimit() {
-        return iLimit;
     }
 
     public void resetErrorSum() {
@@ -131,7 +120,7 @@ public class PID {
         error = sP - cP;
         double dt = elapsedTime.seconds() - lastTimeStamp;
 
-        if (Math.abs(error) < iLimit) {
+        if (Math.abs(error) < coeff.iLimit) {
             errorSum += error * dt;
         }
 

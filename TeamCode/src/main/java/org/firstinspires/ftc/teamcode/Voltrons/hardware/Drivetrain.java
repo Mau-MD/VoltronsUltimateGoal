@@ -21,13 +21,14 @@ public class Drivetrain {
     private Imu imu;
 
     private PID encoderPID;
-    private PID gyroPID;
+    private double gyroKp;
     private PID orientationPID;
 
     private FtcDashboard dashboard;
     private TelemetryPacket packet;
 
     private double slopePercentage;
+    private double minVel = 0.2;
 
     /**
      * Initializes drivetrain class. It requires 4 dc motors and a IMU object
@@ -62,10 +63,10 @@ public class Drivetrain {
 
     /**
      * Sets the gyroPIDF to some specific coeffs
-     * @param gyroPID
+     * @param gyroKp gyroKp
      */
-    public void setGyroPID(PID gyroPID) {
-        this.gyroPID = gyroPID;
+    public void setGyroKp(double gyroKp) {
+        this.gyroKp = gyroKp;
     }
 
     /**
@@ -73,10 +74,10 @@ public class Drivetrain {
      * @param power motor's power
      * @param angle desired angle to follow
      * @param time drive time
-     * @param pid pid controller
+     * @param gyroKp gyroKp
      */
-    public void driveGyro(double[] power, double angle, double time, PID pid) {
-        setGyroPID(pid);
+    public void driveGyro(double[] power, double angle, double time, double gyroKp) {
+        setGyroKp(gyroKp);
         driveGyro(power,angle,time);
     }
 
@@ -99,7 +100,7 @@ public class Drivetrain {
             backRight.set(power[3] - correction);
 
             double error = Imu.getError(imu.getAngleNormalized(), angle);
-            correction = gyroPID.calculate(error,0);
+            correction = gyroKp * error;
         }
 
         idle();
@@ -113,9 +114,11 @@ public class Drivetrain {
     public double getSlopeMultiplier(double distance, double totalDistance) {
         double maxDistance = totalDistance * slopePercentage;
         if (distance > maxDistance)return 1;
+        double output = distance / maxDistance;
+        output = Math.max(output, minVel);
         // 1 -> max
         // x -> distance
-        return distance / maxDistance;
+        return output;
     }
 
 
@@ -132,11 +135,11 @@ public class Drivetrain {
      * @param power motor's power
      * @param angle angle to follow
      * @param goal cm to move
-     * @param gyroPID gyroPIDF controller
+     * @param gyroKp gyroKp
      * @param encoderPID encoderPIDF controller
      */
-    public void driveEncoderGyro(double[] power, double angle, double goal, PID gyroPID, PID encoderPID) {
-        setGyroPID(gyroPID);
+    public void driveEncoderGyro(double[] power, double angle, double goal, double gyroKp, PID encoderPID) {
+        setGyroKp(gyroKp);
         setEncoderPID(encoderPID);
         driveEncoderGyro(power, angle, goal);
     }
@@ -146,6 +149,7 @@ public class Drivetrain {
         setSlopeLimit(slopePercentage);
         driveEncoderGyro(power, angle, goal);
     }
+
     /**
      * Drives the robot following an specific angle traveling an specified amount of centimeters it requires to have set
      * a gyro PIDF controller and a encoder PIDF controller
@@ -160,6 +164,8 @@ public class Drivetrain {
         double startingRightPosition = backRight.getCurrentPosition();
         double ticksGoal = Drivetrain.cmToTicks(goal);
 
+        setOrientation(Math.abs(power[0]), angle);
+
         // Relative Ticks
         while (!Thread.currentThread().isInterrupted()) {
 
@@ -167,14 +173,22 @@ public class Drivetrain {
 
             double encoderOutput = encoderPID.calculate(relativePosition, ticksGoal);
             double angleError = Imu.getError(imu.getAngleNormalized(), angle);
-            double angleCorrection = gyroPID.calculate(angleError, 0);
+            double angleCorrection = gyroKp * angleError;
 
             double slopeOutput = getSlopeMultiplier(relativePosition, ticksGoal);
 
-            frontLeft.set(slopeOutput * encoderOutput * power[0] - angleCorrection);
-            frontRight.set(slopeOutput * encoderOutput * power[1] + angleCorrection);
-            backLeft.set(slopeOutput * encoderOutput * power[2] - angleCorrection);
-            backRight.set(slopeOutput * encoderOutput * power[3] + angleCorrection);
+            frontLeft.set(slopeOutput * encoderOutput * power[0] + angleCorrection);
+            frontRight.set(slopeOutput * encoderOutput * power[1] - angleCorrection);
+            backLeft.set(slopeOutput * encoderOutput * power[2] + angleCorrection);
+            backRight.set(slopeOutput * encoderOutput * power[3] -   angleCorrection);
+
+            packet.put("Angle Error", angleError);
+            packet.put("Angle Correction", angleCorrection);
+
+            packet.put("Left Front", slopeOutput * encoderOutput * power[0] + angleCorrection);
+            packet.put("Right Front", slopeOutput * encoderOutput * power[1] - angleCorrection);
+            packet.put("Left Back", slopeOutput * encoderOutput * power[2] + angleCorrection);
+            packet.put("Right Back", slopeOutput * encoderOutput * power[3] - angleCorrection);
 
             packet.put("Goal", ticksGoal);
             packet.put("Position", relativePosition);

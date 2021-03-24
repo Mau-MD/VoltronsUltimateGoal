@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
-import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
@@ -32,10 +32,10 @@ public class DriveEncoderGyroTest extends LinearOpMode {
     public static double wobbleArmMin = 0;
     public static double wobbleArmMax = 270;
 
-    public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
+    public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001, 0);
+    public static PIDICoeff turnCoeff = new PIDICoeff(0.04,0.02, 0.01,30);
+    public static PIDICoeff encoderCoeff = new PIDICoeff(0,0,0,0);
+    public static double gyroKp = 0;
 
 
     @Override
@@ -89,10 +89,9 @@ public class DriveEncoderGyroTest extends LinearOpMode {
 
         wobbleArm.resetEncoder();
 
-        PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
-        PID gyroPID = new PID(gyro.p, gyro.i, gyro.d, gyro.f);
-        PID turnPID = new PID(turn.p, turn.i, turn.d, turn.f);
-        PID encoderPID = new PID(encoder.p, encoder.i, encoder.d, encoder.f);
+        PID wobblePID = new PID(armCoeff);
+        PID turnPID = new PID(turnCoeff);
+        PID encoderPID = new PID(encoderCoeff);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
@@ -111,22 +110,18 @@ public class DriveEncoderGyroTest extends LinearOpMode {
         // TODO: Different PIDF for strafing?
         while (opModeIsActive()) {
 
-            gyroPID.setCoeff(new PIDCoeff(gyro.p, gyro.i, gyro.d));
-            gyroPID.setILimit(gyro.f);
-            drive.setGyroPID(gyroPID);
-
-            encoderPID.setCoeff(new PIDCoeff(encoder.p, encoder.i, encoder.d));
-            encoderPID.setILimit(encoder.f);
+            drive.setGyroKp(gyroKp);
+            encoderPID.setCoeff(encoderCoeff);
             drive.setEncoderPID(encoderPID);
 
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {1,1,1,1}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {0.8,0.8,0.8,0.8}, 180, 100, 0.4);
             } else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-1,-1,-1,-1}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {-0.8,-0.8,-0.8,-0.8}, 180, 100, 0.4);
             } else if (gamepad1.x && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {1,-1,-1,1}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {0.8,-0.8,-0.8,0.8}, 180, 100, 0.4);
             } else if (gamepad1.y && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-1,1,1,-1}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {-0.8,0.8,0.8,-0.8}, 180, 100, 0.4);
             }
         }
     }

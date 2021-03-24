@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
-import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
@@ -34,10 +34,10 @@ public class TurnTest extends LinearOpMode {
     public static double wobbleArmMin = 0;
     public static double wobbleArmMax = 270;
 
-    public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients turn = new PIDFCoefficients(0.04,0.02,0.01,0);
-    public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
+    public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001, 0);
+    public static PIDICoeff turnCoeff = new PIDICoeff(0.04,0.02, 0.01,30);
+    public static PIDICoeff encoderCoeff = new PIDICoeff(0,0,0,0);
+    public static double gyroKp = 0;
 
     public static double iLimit = 30;
 
@@ -92,18 +92,16 @@ public class TurnTest extends LinearOpMode {
         backRight.setInverted(false);
 
 
-        PID wobblePIDF = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
-        PIDFController gyroPIDF = new PIDFController(gyro.p, gyro.i, gyro.d, gyro.f);
-        PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
-        PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
+        PID wobblePID = new PID(armCoeff);
+        PID turnPID = new PID(turnCoeff);
+        PID encoderPID = new PID(encoderCoeff);
 
-        PID pid = new PID(turn.p, turn.i, turn.d, iLimit);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
-        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 340);
+        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
 
         ElapsedTime aButton = new ElapsedTime();
         aButton.reset();
@@ -115,15 +113,15 @@ public class TurnTest extends LinearOpMode {
         while(opModeIsActive())
         {
             // Pull request
-            pid.setCoeff(new PIDCoeff(turn.p, turn.i, turn.d));
-            pid.setILimit(iLimit);
+            turnPID.setCoeff(turnCoeff);
+            drive.setOrientationPID(turnPID);
 
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,270, pid);
+                drive.setOrientation(0.8,270);
                 aButton.reset();
             }
             else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,180, pid);
+                drive.setOrientation(0.8,180);
             }
         }
     }
