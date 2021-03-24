@@ -2,21 +2,17 @@ package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous.Test;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
-import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
+import org.apache.commons.math3.geometry.euclidean.twod.Line;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
@@ -26,8 +22,8 @@ import org.firstinspires.ftc.teamcode.Voltrons.hardware.Launcher;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.WoobleArm;
 
 @Config
-@TeleOp(name="Turn Test", group="Tests")
-public class TurnTest extends LinearOpMode {
+@TeleOp(name="ArmTest", group = "test")
+public class ArmTest extends LinearOpMode {
 
     public static double wobbleHandMin = 0;
     public static double wobbleHandMax = 180; // Degrees
@@ -35,20 +31,17 @@ public class TurnTest extends LinearOpMode {
     public static double wobbleArmMax = 270;
 
     public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients turn = new PIDFCoefficients(0.04,0.02,0.01,0);
+    public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
     public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
     public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
 
-    public static double iLimit = 30;
-
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         // Drivetrain Motors
         Motor frontLeft = new Motor(hardwareMap, "fl", Motor.GoBILDA.RPM_117);
         Motor frontRight = new Motor(hardwareMap, "fr", Motor.GoBILDA.RPM_117);
         Motor backLeft = new Motor(hardwareMap, "bl", Motor.GoBILDA.RPM_117);
-        Motor backRight= new Motor(hardwareMap, "br", Motor.GoBILDA.RPM_117);
+        Motor backRight = new Motor(hardwareMap, "br", Motor.GoBILDA.RPM_117);
 
         // Wobble Motors
         Motor wobbleArm = new Motor(hardwareMap, "wa");
@@ -66,11 +59,11 @@ public class TurnTest extends LinearOpMode {
         // Imu
         BNO055IMU imu;
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
@@ -92,18 +85,16 @@ public class TurnTest extends LinearOpMode {
         backRight.setInverted(false);
 
 
-        PID wobblePIDF = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
-        PIDFController gyroPIDF = new PIDFController(gyro.p, gyro.i, gyro.d, gyro.f);
-        PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
-        PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
-
-        PID pid = new PID(turn.p, turn.i, turn.d, iLimit);
+        PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
+        PID gyroPID = new PID(gyro.p, gyro.i, gyro.d, gyro.f);
+        PID turnPID = new PID(turn.p, turn.i, turn.d, turn.f);
+        PID encoderPID = new PID(encoder.p, encoder.i, encoder.d, encoder.f);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
-        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 340);
+        WoobleArm arm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
 
         ElapsedTime aButton = new ElapsedTime();
         aButton.reset();
@@ -112,20 +103,22 @@ public class TurnTest extends LinearOpMode {
 
         waitForStart();
 
-        while(opModeIsActive())
-        {
-            // Pull request
-            pid.setCoeff(new PIDCoeff(turn.p, turn.i, turn.d));
-            pid.setILimit(iLimit);
+        // TODO: Separate Front and Strafe. Time if anything goes wrong. Add set orientation every movement.
+        // TODO: Different PIDF for strafing?
+        arm.setGoal(0);
 
+        while (opModeIsActive()) {
+
+            arm.setPIDF(wArm.p, wArm.i, wArm.d, wArm.f);
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,270, pid);
-                aButton.reset();
+                arm.setGoal(wobbleArmMin);
             }
-            else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.setOrientation(0.8,180, pid);
+            if (gamepad1.a && aButton.milliseconds() > 100) {
+                arm.setGoal(wobbleArmMax);
             }
+
+            arm.goToGoal();
+
         }
     }
 }
-

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.hardware;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -19,10 +20,8 @@ public class Drivetrain {
     private Motor backRight;
     private Imu imu;
 
-    private PIDFController orientationPIDF;
-    private PIDFController gyroPIDF;
-    private PIDFController encoderPIDF;
-
+    private PID encoderPID;
+    private PID gyroPID;
     private PID orientationPID;
 
     private FtcDashboard dashboard;
@@ -61,10 +60,10 @@ public class Drivetrain {
 
     /**
      * Sets the gyroPIDF to some specific coeffs
-     * @param gyroPIDF
+     * @param gyroPID
      */
-    public void setGyroPIDF(PIDFController gyroPIDF) {
-        this.gyroPIDF = gyroPIDF;
+    public void setGyroPID(PID gyroPID) {
+        this.gyroPID = gyroPID;
     }
 
     /**
@@ -72,10 +71,10 @@ public class Drivetrain {
      * @param power motor's power
      * @param angle desired angle to follow
      * @param time drive time
-     * @param pidf pidf controller
+     * @param pid pid controller
      */
-    public void driveGyro(double[] power, double angle, double time, PIDFController pidf) {
-        setGyroPIDF(pidf);
+    public void driveGyro(double[] power, double angle, double time, PID pid) {
+        setGyroPID(pid);
         driveGyro(power,angle,time);
     }
 
@@ -98,7 +97,7 @@ public class Drivetrain {
             backRight.set(power[3] - correction);
 
             double error = Imu.getError(imu.getAngleNormalized(), angle);
-            correction = gyroPIDF.calculate(error,0);
+            correction = gyroPID.calculate(error,0);
         }
 
         idle();
@@ -106,10 +105,10 @@ public class Drivetrain {
 
     /**
      * Sets the encoderPIDF to some specific coeffs
-     * @param encoderPIDF
+     * @param encoderPID
      */
-    public void setEncoderPIDF(PIDFController encoderPIDF) {
-        this.encoderPIDF = encoderPIDF;
+    public void setEncoderPID(PID encoderPID) {
+        this.encoderPID = encoderPID;
     }
 
     /**
@@ -117,12 +116,12 @@ public class Drivetrain {
      * @param power motor's power
      * @param angle angle to follow
      * @param goal cm to move
-     * @param gyroPIDF gyroPIDF controller
-     * @param encoderPIDF encoderPIDF controller
+     * @param gyroPID gyroPIDF controller
+     * @param encoderPID encoderPIDF controller
      */
-    public void driveEncoderGyro(double[] power, double angle, double goal, PIDFController gyroPIDF, PIDFController encoderPIDF) {
-        setGyroPIDF(gyroPIDF);
-        setEncoderPIDF(encoderPIDF);
+    public void driveEncoderGyro(double[] power, double angle, double goal, PID gyroPID, PID encoderPID) {
+        setGyroPID(gyroPID);
+        setEncoderPID(encoderPID);
         driveEncoderGyro(power, angle, goal);
     }
 
@@ -143,35 +142,39 @@ public class Drivetrain {
         // Relative Ticks
         while (!Thread.currentThread().isInterrupted()) {
 
-            relativePosition = ((-backLeft.getCurrentPosition() - startingLeftPosition) + (backRight.getCurrentPosition() - startingRightPosition)) / 2.0;
-            double encoderOutput = encoderPIDF.calculate(relativePosition, ticksGoal);
+            relativePosition = (Math.abs(-backLeft.getCurrentPosition() - startingLeftPosition) + Math.abs(backRight.getCurrentPosition() - startingRightPosition)) / 2.0;
+
+            double encoderOutput = encoderPID.calculate(relativePosition, ticksGoal);
             double angleError = Imu.getError(imu.getAngleNormalized(), angle);
-            double angleCorrection = gyroPIDF.calculate(angleError, 0);
+            double angleCorrection = gyroPID.calculate(angleError, 0);
 
             frontLeft.set(encoderOutput * power[0] - angleCorrection);
             frontRight.set(encoderOutput * power[1] + angleCorrection);
             backLeft.set(encoderOutput * power[2] - angleCorrection);
             backRight.set(encoderOutput * power[3] + angleCorrection);
 
-            packet.put("Left Position", (-backLeft.getCurrentPosition() - startingLeftPosition));
-            packet.put("Right Position", (backRight.getCurrentPosition() - startingRightPosition));
-            packet.put("Encoder Output", encoderOutput);
-            packet.put("Angle Error", angleError);
-            packet.put("Correction Output", angleCorrection);
+            packet.put("Goal", ticksGoal);
+            packet.put("Position", relativePosition);
+            packet.put("Error", encoderPID.getError());
+            packet.put("Output", encoderOutput);
+            packet.put("pContrib", encoderPID.getPContrib());
+            packet.put("iContrib", encoderPID.getIContrib());
+            packet.put("dContrib", encoderPID.getDContrib());
+            packet.put("setPoint", encoderPID.getSetPoint());
 
             dashboard.sendTelemetryPacket(packet);
 
-            if (Math.abs(encoderOutput) < 0.2)break;
+            if (encoderPID.getError() < Drivetrain.cmToTicks(2))break;
         }
         idle();
     }
 
     /**
      * Sets the gyroPIDF to some specific coeffs
-     * @param orientationPIDF pidf controller
+     * @param orientationPID pidf controller
      */
-    public void setOrientationPIDF(PIDFController orientationPIDF) {
-        this.orientationPIDF = orientationPIDF;
+    public void setOrientationPIDF(PID orientationPID) {
+        this.orientationPID = orientationPID;
     }
 
     public void setOrientationPID(PID orientationPID) {
@@ -182,13 +185,8 @@ public class Drivetrain {
      * Turns the robot to an specific angle
      * @param power motor's power
      * @param angle angle to turn
-     * @param pidf pidf controller
+     * @param pid pid controller
      */
-    public void setOrientation(double power, double angle, PIDFController pidf) {
-        setOrientationPIDF(pidf);
-        setOrientation(power,angle);
-    }
-
     public void setOrientation(double power, double angle, PID pid) {
         setOrientationPID(pid);
         setOrientationC(power, angle);
@@ -249,7 +247,7 @@ public class Drivetrain {
         while (!Thread.currentThread().isInterrupted()) {
 
             double error = Imu.getError(imu.getAngleNormalized(), angle);
-            double correction =  orientationPIDF.calculate(error,0);
+            double correction =  orientationPID.calculate(error,0);
 
             frontLeft.set(power * correction);
             frontRight.set(-power * correction);
@@ -299,7 +297,7 @@ public class Drivetrain {
             relativePosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0) - startingPosition;
             double newHeading = Imu.normalizeSplineAngle(spline.getHeading(relativePosition));
             double angleError = Imu.getError(imu.getAngleNormalized(), newHeading);
-            double angleCorrection = orientationPIDF.calculate(angleError, 0);
+            double angleCorrection = orientationPID.calculate(angleError, 0);
 
             frontLeft.set(power + angleCorrection); // Maybe it should change depending of direction
             frontRight.set(power - angleCorrection);

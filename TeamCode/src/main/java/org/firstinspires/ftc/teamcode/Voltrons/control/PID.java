@@ -9,6 +9,7 @@ public class PID {
     PIDCoeff coeff;
     double iLimit;
 
+    double error;
     double lastTimeStamp;
     double errorSum;
     double lastError;
@@ -26,6 +27,7 @@ public class PID {
         elapsedTime.reset();
 
         lastTimeStamp = elapsedTime.seconds();
+        error = 0;
         errorSum = 0;
         lastError = 0;
         setPoint = 0;
@@ -43,6 +45,7 @@ public class PID {
         elapsedTime.reset();
 
         lastTimeStamp = elapsedTime.seconds();
+        error = 0;
         errorSum = 0;
         lastError = 0;
         setPoint = 0;
@@ -56,6 +59,7 @@ public class PID {
         elapsedTime.reset();
 
         lastTimeStamp = elapsedTime.seconds();
+        error = 0;
         errorSum = 0;
         lastError = 0;
         setPoint = 0;
@@ -105,8 +109,10 @@ public class PID {
         return dContrib;
     }
 
+    public double getError() { return error; }
+
     public double calculate(double cP, double sP) {
-        double error = sP - cP;
+        error = sP - cP;
         double dt = elapsedTime.seconds() - lastTimeStamp;
 
         if (Math.abs(error) < iLimit) {

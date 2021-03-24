@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Imu;
@@ -92,7 +93,7 @@ public class SplineTest extends LinearOpMode {
         backRight.setInverted(false);
 
 
-        PIDFController wobblePIDF = new PIDFController(wArm.p, wArm.i, wArm.d, wArm.f);
+        PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
         PIDFController gyroPIDF = new PIDFController(gyro.p, gyro.i, gyro.d, gyro.f);
         PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
         PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
@@ -101,7 +102,7 @@ public class SplineTest extends LinearOpMode {
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
-        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePIDF, wobbleArmMin, wobbleArmMax, 340);
+        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
 
 
         waitForStart();

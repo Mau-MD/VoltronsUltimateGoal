@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Intake;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Launcher;
@@ -95,12 +96,12 @@ public class VoltronsDriver extends LinearOpMode {
         );
 
         // Hardware
-        PIDFController pidf = new PIDFController(kp,kd,ki,kf);
+        PID pid = new PID(kp,kd,ki,kf);
         MecanumDrive mecanum = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
         Belt belt = new Belt(beltDown, betlUp);
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
-        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, pidf, wobbleArmMin, wobbleArmMax, 1000);
+        WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, pid, wobbleArmMin, wobbleArmMax, 1000);
 
         // Util
         boolean slowMode = false;

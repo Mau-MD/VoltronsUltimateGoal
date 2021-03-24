@@ -5,6 +5,9 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
+
 public class WoobleArm {
 
     Motor arm;
@@ -12,7 +15,7 @@ public class WoobleArm {
     boolean open;
     double min, max;
 
-    PIDFController pidf;
+    PID pid;
     double[] pidfCoeff;
     double goal;
     double armMin, armMax;
@@ -22,15 +25,15 @@ public class WoobleArm {
      * Initializes the WobbleArm Class
      * @param arm Motor that controls the arm
      * @param hand Servo that controls the hand
-     * @param pidf PIDF Class that ensures a precise movement of the arm. It should have the Coeffs already set.
+     * @param pid PID Class that ensures a precise movement of the arm. It should have the Coeffs already set.
      * @param armMin Minimum degree of the arm
      * @param armMax Maximum degree of the arm
      * @param cpr Counts per Revolution of the motor
      */
-    public WoobleArm(Motor arm, SimpleServo hand, PIDFController pidf, double armMin, double armMax, double cpr) {
+    public WoobleArm(Motor arm, SimpleServo hand, PID pid, double armMin, double armMax, double cpr) {
         this.arm = arm;
         this.hand = hand;
-        this.pidf = pidf;
+        this.pid = pid;
         this.armMin = armMin;
         this.armMax = armMax;
         this.cpr = cpr;
@@ -102,7 +105,8 @@ public class WoobleArm {
      * @param kf friction constant
      */
     public void setPIDF(double kp, double kd, double ki, double kf) {
-        pidf.setPIDF(kp,kd,ki,kf);
+        pid.setCoeff(new PIDCoeff(kp,kd,ki));
+        pid.setILimit(kf);
         pidfCoeff = new double[]{kp, kd, ki, kf};
     }
 
@@ -113,7 +117,7 @@ public class WoobleArm {
     public void setGoal(double goal) {
         goal = Range.clip(goal, armMin, armMax);
         this.goal = goal;
-        pidf.setSetPoint(goal); // Objetivo
+        pid.setSetPoint(goal); // Objetivo
     }
 
     /**
@@ -131,7 +135,7 @@ public class WoobleArm {
      */
     public void goToGoal() {
         if (!active)return;
-        double output = pidf.calculate(arm.getCurrentPosition() * 360.0 / cpr); // Conversion to degrees
+        double output = pid.calculate(arm.getCurrentPosition() * 360.0 / cpr, goal); // Conversion to degrees
         arm.set(output);
     }
 
