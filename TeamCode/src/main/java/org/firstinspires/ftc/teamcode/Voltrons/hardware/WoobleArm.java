@@ -61,6 +61,9 @@ public class WoobleArm {
         hand.setPosition(0);
     }
 
+    public void resetSum() {
+        pid.resetErrorSum();
+    }
     /**
      * Sets the hand to a desired position
      * @param position position between 0 and 1
@@ -118,6 +121,7 @@ public class WoobleArm {
     }
 
     public void setILimit(double iLimit) {
+        pid.setILimit(iLimit);
         this.iLimit = iLimit;
     }
 
@@ -151,15 +155,16 @@ public class WoobleArm {
      */
     public void goToGoal() {
         if (!active)return;
-        double output = pid.calculate(arm.getCurrentPosition() * 360.0 / cpr, goal); // Conversion to degrees
+        double output = pid.calculate(arm.getCurrentPosition(), goal); // Conversion to degrees
 
-        packet.put("Current Position", arm.getCurrentPosition() * 360.0 / cpr);
+        packet.put("Current Position", arm.getCurrentPosition());
         packet.put("Goal", goal);
         packet.put("P Contrib", pid.getPContrib());
         packet.put("I Contrib", pid.getIContrib());
         packet.put("D Contrib", pid.getDContrib());
         packet.put("Output", output);
-
+        packet.put("Error", pid.getError());
+        packet.put("Error Sum", pid.getErrorSum());
         dashboard.sendTelemetryPacket(packet);
         arm.set(output);
     }
@@ -196,6 +201,10 @@ public class WoobleArm {
 
     public double getILimit() {
         return pid.getILimit();
+    }
+
+    public double getError() {
+        return pid.getError();
     }
 
 

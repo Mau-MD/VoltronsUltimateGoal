@@ -119,6 +119,14 @@ public class PID {
         return iLimit;
     }
 
+    public void resetErrorSum() {
+        errorSum = 0;
+    }
+
+    public double getErrorSum() {
+        return errorSum;
+    }
+
     public double calculate(double cP, double sP) {
         error = sP - cP;
         double dt = elapsedTime.seconds() - lastTimeStamp;

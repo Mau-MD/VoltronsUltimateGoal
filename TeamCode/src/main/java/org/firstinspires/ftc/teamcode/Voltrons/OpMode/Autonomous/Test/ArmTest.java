@@ -9,10 +9,8 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.apache.commons.math3.geometry.euclidean.twod.Line;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PIDCoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
@@ -28,12 +26,12 @@ public class ArmTest extends LinearOpMode {
     public static double wobbleHandMin = 0;
     public static double wobbleHandMax = 180; // Degrees
     public static double wobbleArmMin = 0;
-    public static double wobbleArmMax = 270;
+    public static double wobbleArmMax = 726;
 
     public static double A = 50;
-    public static double B = 180;
+    public static double B = 650;
 
-    public static PIDCoeff armCoeff = new PIDCoeff(0,0,0);
+    public static PIDCoeff armCoeff = new PIDCoeff(0.0008,0,0.0001);
     public static double iLimit = 0;
 
     @Override
@@ -85,6 +83,7 @@ public class ArmTest extends LinearOpMode {
         backLeft.setInverted(false);
         backRight.setInverted(false);
 
+        wobbleArm.resetEncoder();
         PID wobblePID = new PID(armCoeff, iLimit);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
@@ -92,7 +91,6 @@ public class ArmTest extends LinearOpMode {
         Intake intake = new Intake(intakeMotor);
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
         WoobleArm arm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
-
         ElapsedTime aButton = new ElapsedTime();
         aButton.reset();
 
@@ -101,22 +99,36 @@ public class ArmTest extends LinearOpMode {
         waitForStart();
 
 
+        arm.setDashboard(FtcDashboard.getInstance());
         arm.setGoal(0);
+
 
         while (opModeIsActive()) {
 
             arm.setPID(armCoeff);
             arm.setILimit(iLimit);
             arm.setArmRange(wobbleArmMin, wobbleArmMax);
+            arm.setRange(wobbleHandMin, wobbleHandMax);
 
             if (gamepad1.a && aButton.milliseconds() > 40) {
                 arm.setGoal(A);
+                arm.resetSum();
                 aButton.reset();
             }
             if (gamepad1.b && aButton.milliseconds() > 40) {
                 arm.setGoal(B);
+                arm.resetSum();
                 aButton.reset();
             }
+            if (gamepad1.x && aButton.milliseconds() > 40) {
+                arm.closeHand();
+                aButton.reset();
+            }
+            if (gamepad1.y && aButton.milliseconds() > 40) {
+                arm.openHand();
+                aButton.reset();
+            }
+
 
             arm.goToGoal();
 

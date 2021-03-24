@@ -87,6 +87,7 @@ public class DriveEncoderGyroTest extends LinearOpMode {
         backLeft.setInverted(false);
         backRight.setInverted(false);
 
+        wobbleArm.resetEncoder();
 
         PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
         PID gyroPID = new PID(gyro.p, gyro.i, gyro.d, gyro.f);
@@ -112,17 +113,20 @@ public class DriveEncoderGyroTest extends LinearOpMode {
 
             gyroPID.setCoeff(new PIDCoeff(gyro.p, gyro.i, gyro.d));
             gyroPID.setILimit(gyro.f);
+            drive.setGyroPID(gyroPID);
+
             encoderPID.setCoeff(new PIDCoeff(encoder.p, encoder.i, encoder.d));
-            encoderPID.setILimit(gyro.f);
+            encoderPID.setILimit(encoder.f);
+            drive.setEncoderPID(encoderPID);
 
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {1,1,1,1}, 180, 100, gyroPID, encoderPID);
+                drive.driveEncoderGyro(new double[] {1,1,1,1}, 180, 100, 0.4);
             } else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-1,-1,-1,-1}, 180, 100, gyroPID, encoderPID);
+                drive.driveEncoderGyro(new double[] {-1,-1,-1,-1}, 180, 100, 0.4);
             } else if (gamepad1.x && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {1,-1,-1,1}, 180, 100, gyroPID, encoderPID);
+                drive.driveEncoderGyro(new double[] {1,-1,-1,1}, 180, 100, 0.4);
             } else if (gamepad1.y && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-1,1,1,-1}, 180, 100, gyroPID, encoderPID);
+                drive.driveEncoderGyro(new double[] {-1,1,1,-1}, 180, 100, 0.4);
             }
         }
     }
