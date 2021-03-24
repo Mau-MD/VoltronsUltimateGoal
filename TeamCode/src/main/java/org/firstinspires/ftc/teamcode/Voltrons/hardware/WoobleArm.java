@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Voltrons.hardware;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -16,11 +18,15 @@ public class WoobleArm {
     double min, max;
 
     PID pid;
-    double[] pidfCoeff;
+    double iLimit;
     double goal;
     double armMin, armMax;
     boolean active = true;
     double cpr;
+
+    FtcDashboard dashboard;
+    TelemetryPacket packet = new TelemetryPacket();
+
     /**
      * Initializes the WobbleArm Class
      * @param arm Motor that controls the arm
@@ -102,12 +108,21 @@ public class WoobleArm {
      * @param kp proportional constant
      * @param kd derivative constant
      * @param ki integral constant
-     * @param kf friction constant
      */
-    public void setPIDF(double kp, double kd, double ki, double kf) {
+    public void setPID(double kp, double kd, double ki) {
         pid.setCoeff(new PIDCoeff(kp,kd,ki));
-        pid.setILimit(kf);
-        pidfCoeff = new double[]{kp, kd, ki, kf};
+    }
+
+    public void setPID(PIDCoeff coeff) {
+        pid.setCoeff(coeff);
+    }
+
+    public void setILimit(double iLimit) {
+        this.iLimit = iLimit;
+    }
+
+    public void setDashboard(FtcDashboard dashboard) {
+        this.dashboard = dashboard;
     }
 
     /**
@@ -132,10 +147,20 @@ public class WoobleArm {
 
     /**
      * Makes the wobble arm to go to the desired position
+     * Should be called on a loop
      */
     public void goToGoal() {
         if (!active)return;
         double output = pid.calculate(arm.getCurrentPosition() * 360.0 / cpr, goal); // Conversion to degrees
+
+        packet.put("Current Position", arm.getCurrentPosition() * 360.0 / cpr);
+        packet.put("Goal", goal);
+        packet.put("P Contrib", pid.getPContrib());
+        packet.put("I Contrib", pid.getIContrib());
+        packet.put("D Contrib", pid.getDContrib());
+        packet.put("Output", output);
+
+        dashboard.sendTelemetryPacket(packet);
         arm.set(output);
     }
 
@@ -165,8 +190,12 @@ public class WoobleArm {
      * Get the current PIDF Coeffs
      * @return an array of four elements with the Coeffs
      */
-    public double[] getPIDF() {
-        return pidfCoeff;
+    public PIDCoeff getPID() {
+        return pid.getCoeff();
+    }
+
+    public double getILimit() {
+        return pid.getILimit();
     }
 
 

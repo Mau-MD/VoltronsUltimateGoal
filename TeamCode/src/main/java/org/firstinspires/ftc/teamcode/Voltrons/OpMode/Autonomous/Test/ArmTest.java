@@ -30,10 +30,11 @@ public class ArmTest extends LinearOpMode {
     public static double wobbleArmMin = 0;
     public static double wobbleArmMax = 270;
 
-    public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
+    public static double A = 50;
+    public static double B = 180;
+
+    public static PIDCoeff armCoeff = new PIDCoeff(0,0,0);
+    public static double iLimit = 0;
 
     @Override
     public void runOpMode() {
@@ -84,11 +85,7 @@ public class ArmTest extends LinearOpMode {
         backLeft.setInverted(false);
         backRight.setInverted(false);
 
-
-        PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
-        PID gyroPID = new PID(gyro.p, gyro.i, gyro.d, gyro.f);
-        PID turnPID = new PID(turn.p, turn.i, turn.d, turn.f);
-        PID encoderPID = new PID(encoder.p, encoder.i, encoder.d, encoder.f);
+        PID wobblePID = new PID(armCoeff, iLimit);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
@@ -103,21 +100,26 @@ public class ArmTest extends LinearOpMode {
 
         waitForStart();
 
-        // TODO: Separate Front and Strafe. Time if anything goes wrong. Add set orientation every movement.
-        // TODO: Different PIDF for strafing?
+
         arm.setGoal(0);
 
         while (opModeIsActive()) {
 
-            arm.setPIDF(wArm.p, wArm.i, wArm.d, wArm.f);
-            if (gamepad1.a && aButton.milliseconds() > 100) {
-                arm.setGoal(wobbleArmMin);
+            arm.setPID(armCoeff);
+            arm.setILimit(iLimit);
+            arm.setArmRange(wobbleArmMin, wobbleArmMax);
+
+            if (gamepad1.a && aButton.milliseconds() > 40) {
+                arm.setGoal(A);
+                aButton.reset();
             }
-            if (gamepad1.a && aButton.milliseconds() > 100) {
-                arm.setGoal(wobbleArmMax);
+            if (gamepad1.b && aButton.milliseconds() > 40) {
+                arm.setGoal(B);
+                aButton.reset();
             }
 
             arm.goToGoal();
+
 
         }
     }

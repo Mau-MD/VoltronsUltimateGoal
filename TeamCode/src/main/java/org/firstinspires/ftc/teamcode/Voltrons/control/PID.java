@@ -6,7 +6,7 @@ public class PID {
 
     ElapsedTime elapsedTime = new ElapsedTime();
 
-    PIDCoeff coeff;
+    public PIDCoeff coeff;
     double iLimit;
 
     double error;
@@ -110,6 +110,14 @@ public class PID {
     }
 
     public double getError() { return error; }
+
+    public PIDCoeff getCoeff() {
+        return coeff;
+    }
+
+    public double getILimit() {
+        return iLimit;
+    }
 
     public double calculate(double cP, double sP) {
         error = sP - cP;
