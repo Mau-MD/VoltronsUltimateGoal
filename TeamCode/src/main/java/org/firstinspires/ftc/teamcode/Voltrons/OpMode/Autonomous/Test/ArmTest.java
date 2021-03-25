@@ -30,6 +30,7 @@ public class ArmTest extends LinearOpMode {
 
     public static double A = 50;
     public static double B = 650;
+    public static double C = 300;
 
     public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001,0);
 
@@ -91,9 +92,11 @@ public class ArmTest extends LinearOpMode {
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
         WoobleArm arm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
         ElapsedTime aButton = new ElapsedTime();
-        aButton.reset();
 
+        arm.closeHand();
+        aButton.reset();
         drive.setDashboard(FtcDashboard.getInstance());
+
 
         waitForStart();
 
@@ -119,10 +122,16 @@ public class ArmTest extends LinearOpMode {
                 aButton.reset();
             }
             if (gamepad1.x && aButton.milliseconds() > 40) {
+                arm.setGoal(C);
+                arm.resetSum();
+                aButton.reset();
+            }
+
+            if (gamepad1.dpad_left && aButton.milliseconds() > 40) {
                 arm.closeHand();
                 aButton.reset();
             }
-            if (gamepad1.y && aButton.milliseconds() > 40) {
+            if (gamepad1.dpad_right && aButton.milliseconds() > 40) {
                 arm.openHand();
                 aButton.reset();
             }

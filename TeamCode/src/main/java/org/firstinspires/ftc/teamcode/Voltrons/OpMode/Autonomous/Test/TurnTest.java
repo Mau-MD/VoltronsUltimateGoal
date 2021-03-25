@@ -35,7 +35,8 @@ public class TurnTest extends LinearOpMode {
     public static double wobbleArmMax = 270;
 
     public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001, 0);
-    public static PIDICoeff turnCoeff = new PIDICoeff(0.04,0.02, 0.01,30);
+    public static PIDICoeff turnCoeff = new PIDICoeff(0.07,0, 0,0);
+    public static PIDICoeff turnCoeff2 = new PIDICoeff(0.04,0.02, 0.01,30);
     public static PIDICoeff encoderCoeff = new PIDICoeff(0,0,0,0);
     public static double gyroKp = 0;
 
@@ -122,6 +123,13 @@ public class TurnTest extends LinearOpMode {
             }
             else if (gamepad1.b && aButton.milliseconds() > 100) {
                 drive.setOrientation(0.8,180);
+                aButton.reset();
+            }
+            else if (gamepad1.x && aButton.milliseconds() > 100) {
+                drive.setOrientationC(0.8, 270);
+            }
+            else if (gamepad1.y && aButton.milliseconds() > 100){
+                drive.setOrientationC(0.8, 180);
             }
         }
     }

@@ -40,7 +40,7 @@ public class SplineTest extends LinearOpMode {
     public static double wobbleArmMax = 270;
 
     public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001, 0);
-    public static PIDICoeff turnCoeff = new PIDICoeff(0.04,0, 0.01,0);
+    public static PIDICoeff turnCoeff = new PIDICoeff(0.07,0, 0,0);
     public static PIDICoeff encoderCoeff = new PIDICoeff(0,0,0,0);
     public static double gyroKp = 0.01;
 
@@ -110,6 +110,8 @@ public class SplineTest extends LinearOpMode {
         drive.setDashboard(FtcDashboard.getInstance());
         waitForStart();
 
+        double power = 0.5;
+
         while(opModeIsActive())
         {
 
@@ -127,6 +129,15 @@ public class SplineTest extends LinearOpMode {
             if (gamepad1.a && aButton.milliseconds() > 40) {
                 Spline spline = new Spline(first, 5,5);
                 drive.followPath(spline,0.5);
+                aButton.reset();
+            }
+            if (gamepad1.b && aButton.milliseconds() > 100) {
+                power += 0.1;
+                aButton.reset();
+            }
+            else if (gamepad1.x && aButton.milliseconds() > 100) {
+                power -= 0.1;
+                aButton.reset();
             }
         }
     }
