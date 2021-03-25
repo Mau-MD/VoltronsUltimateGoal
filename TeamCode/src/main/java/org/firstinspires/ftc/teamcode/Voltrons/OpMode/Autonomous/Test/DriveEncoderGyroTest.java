@@ -112,16 +112,19 @@ public class DriveEncoderGyroTest extends LinearOpMode {
 
             drive.setGyroKp(gyroKp);
             encoderPID.setCoeff(encoderCoeff);
+            turnPID.setCoeff(turnCoeff);
+
             drive.setEncoderPID(encoderPID);
+            drive.setOrientationPID(turnPID);
 
             if (gamepad1.a && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {0.8,0.8,0.8,0.8}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {0.8,0.8,0.8,0.8}, 180, 100, 0.2);
             } else if (gamepad1.b && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-0.8,-0.8,-0.8,-0.8}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {-0.8,-0.8,-0.8,-0.8}, 180, 100, 0.2);
             } else if (gamepad1.x && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {0.8,-0.8,-0.8,0.8}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {0.8,-0.8,-0.8,0.8}, 180, 100, 0.2);
             } else if (gamepad1.y && aButton.milliseconds() > 100) {
-                drive.driveEncoderGyro(new double[] {-0.8,0.8,0.8,-0.8}, 180, 100, 0.4);
+                drive.driveEncoderGyro(new double[] {-0.8,0.8,0.8,-0.8}, 180, 100, 0.2);
             }
         }
     }

@@ -65,9 +65,12 @@ public class Imu {
      * @return normalized angle
      */
     public static double normalizeSplineAngle(double angle) {
-        double newAngle = angle;
-        newAngle %= 360;
-        return newAngle;
+       if (angle >= 0) {
+           return 180 + (90 - angle);
+       }
+       else {
+           return (270 + Math.abs(angle)) % 360;
+       }
     }
 
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous.Test;
 
 import android.net.wifi.aware.PublishConfig;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
@@ -16,10 +17,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Point;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
 import org.firstinspires.ftc.teamcode.Voltrons.control.PID;
+import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Belt;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.Voltrons.hardware.Imu;
@@ -36,11 +39,10 @@ public class SplineTest extends LinearOpMode {
     public static double wobbleArmMin = 0;
     public static double wobbleArmMax = 270;
 
-    public static PIDFCoefficients wArm = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients turn = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients gyro = new PIDFCoefficients(0,0,0,0);
-    public static PIDFCoefficients encoder = new PIDFCoefficients(0,0,0,0);
-
+    public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0,0.0001, 0);
+    public static PIDICoeff turnCoeff = new PIDICoeff(0.04,0, 0.01,0);
+    public static PIDICoeff encoderCoeff = new PIDICoeff(0,0,0,0);
+    public static double gyroKp = 0.01;
 
     @Override
     public void runOpMode()
@@ -93,10 +95,9 @@ public class SplineTest extends LinearOpMode {
         backRight.setInverted(false);
 
 
-        PID wobblePID = new PID(wArm.p, wArm.i, wArm.d, wArm.f);
-        PIDFController gyroPIDF = new PIDFController(gyro.p, gyro.i, gyro.d, gyro.f);
-        PIDFController turnPIDF = new PIDFController(turn.p, turn.i, turn.d, turn.f);
-        PIDFController encoderPIDF = new PIDFController(encoder.p, encoder.i, encoder.d, encoder.f);
+        PID wobblePID = new PID(armCoeff);
+        PID turnPID = new PID(turnCoeff);
+        PID encoderPID = new PID(encoderCoeff);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
@@ -104,11 +105,17 @@ public class SplineTest extends LinearOpMode {
         Launcher launcher = new Launcher(leftLauncher, rightLauncher);
         WoobleArm woobleArm = new WoobleArm(wobbleArm, wobbleHand, wobblePID, wobbleArmMin, wobbleArmMax, 340);
 
-
+        ElapsedTime aButton = new ElapsedTime();
+        aButton.reset();
+        drive.setDashboard(FtcDashboard.getInstance());
         waitForStart();
 
-        if(opModeIsActive())
+        while(opModeIsActive())
         {
+
+            drive.setOrientationPID(turnPID);
+            drive.setGyroKp(gyroKp);
+
             Point[] first = new Point[] {
                     new Point(166,56),
                     new Point(175, 89),
@@ -117,8 +124,10 @@ public class SplineTest extends LinearOpMode {
                     new Point(220,170)
             };
 
-            Spline spline = new Spline(first, 5,5);
-            drive.followPath(spline,0.5);
+            if (gamepad1.a && aButton.milliseconds() > 40) {
+                Spline spline = new Spline(first, 5,5);
+                drive.followPath(spline,0.5);
+            }
         }
     }
 }

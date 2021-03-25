@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Voltrons.Constants;
 import org.firstinspires.ftc.teamcode.Voltrons.Path.Spline;
@@ -164,7 +165,7 @@ public class Drivetrain {
         double startingRightPosition = backRight.getCurrentPosition();
         double ticksGoal = Drivetrain.cmToTicks(goal);
 
-        setOrientation(Math.abs(power[0]), angle);
+        // setOrientation(Math.abs(power[0]), angle);
 
         // Relative Ticks
         while (!Thread.currentThread().isInterrupted()) {
@@ -177,6 +178,8 @@ public class Drivetrain {
 
             double slopeOutput = getSlopeMultiplier(relativePosition, ticksGoal);
 
+            encoderOutput = Range.clip(encoderOutput,-1,1);
+
             frontLeft.set(slopeOutput * encoderOutput * power[0] + angleCorrection);
             frontRight.set(slopeOutput * encoderOutput * power[1] - angleCorrection);
             backLeft.set(slopeOutput * encoderOutput * power[2] + angleCorrection);
@@ -185,10 +188,10 @@ public class Drivetrain {
             packet.put("Angle Error", angleError);
             packet.put("Angle Correction", angleCorrection);
 
-            packet.put("Left Front", slopeOutput * encoderOutput * power[0] + angleCorrection);
-            packet.put("Right Front", slopeOutput * encoderOutput * power[1] - angleCorrection);
-            packet.put("Left Back", slopeOutput * encoderOutput * power[2] + angleCorrection);
-            packet.put("Right Back", slopeOutput * encoderOutput * power[3] - angleCorrection);
+            packet.put("Left Front", slopeOutput * encoderOutput * power[0] - angleCorrection);
+            packet.put("Right Front", slopeOutput * encoderOutput * power[1] + angleCorrection);
+            packet.put("Left Back", slopeOutput * encoderOutput * power[2] - angleCorrection);
+            packet.put("Right Back", slopeOutput * encoderOutput * power[3] + angleCorrection);
 
             packet.put("Goal", ticksGoal);
             packet.put("Position", relativePosition);
@@ -261,7 +264,7 @@ public class Drivetrain {
 
             dashboard.sendTelemetryPacket(packet);
 
-            if (Math.abs(error) <= 0.6)
+            if (Math.abs(error) <= 2)
             {
                 idle();
                 break;
@@ -296,7 +299,7 @@ public class Drivetrain {
 
             dashboard.sendTelemetryPacket(packet);
 
-            if (Math.abs(error) <= 0.6)
+            if (Math.abs(error) <= 2)
             {
                 if (!firstZero){
                     firstZero = true;
@@ -323,15 +326,19 @@ public class Drivetrain {
     public void followPath(Spline spline, double power) {
         // Todo en centimetros
         double relativePosition;
-        double startingPosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0);
-        double startingHeading = spline.getHeading(0);
+        double startingLeftPosition = Drivetrain.ticksToCm(-backLeft.getCurrentPosition());
+        double startingRightPosition = Drivetrain.ticksToCm(backRight.getCurrentPosition());
+        double startingHeading = Imu.normalizeSplineAngle(spline.getHeading(1));
+
+        packet.put("Starting Heading", startingHeading);
+        dashboard.sendTelemetryPacket(packet);
 
         setOrientation(power, startingHeading);
 
         // Should have really low power to avoid overshooting
         do {
 
-            relativePosition = Drivetrain.ticksToCm((backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 2.0) - startingPosition;
+            relativePosition = (Math.abs(Drivetrain.ticksToCm(-backLeft.getCurrentPosition()) - startingLeftPosition) + Math.abs(Drivetrain.ticksToCm(backRight.getCurrentPosition()) - startingRightPosition)) / 2.0;
             double newHeading = Imu.normalizeSplineAngle(spline.getHeading(relativePosition));
             double angleError = Imu.getError(imu.getAngleNormalized(), newHeading);
             double angleCorrection = orientationPID.calculate(angleError, 0);
