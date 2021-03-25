@@ -8,6 +8,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.ReadWriteFile;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Config
@@ -41,13 +49,17 @@ public class VoltronsDriveNFC extends LinearOpMode {
     ElapsedTime a2Button = new ElapsedTime();
     ElapsedTime woobleDelay = new ElapsedTime();
 
+    File UpPath = AppUtil.getInstance().getSettingsFile("UpMovement.txt");
+    File DownPath = AppUtil.getInstance().getSettingsFile("DownMovement.txt");
+
+
     @Override
     public void runOpMode() {
 
-        left_front = hardwareMap.dcMotor.get("lf");
-        right_front = hardwareMap.dcMotor.get("rf");
-        left_back = hardwareMap.dcMotor.get("lb");
-        right_back = hardwareMap.dcMotor.get("rb");
+        left_front = hardwareMap.dcMotor.get("fl");
+        right_front = hardwareMap.dcMotor.get("fr");
+        left_back = hardwareMap.dcMotor.get("bl");
+        right_back = hardwareMap.dcMotor.get("br");
 
         wooble_arm = hardwareMap.dcMotor.get("wa");
         wooble_hand = hardwareMap.servo.get("wh");
@@ -92,6 +104,15 @@ public class VoltronsDriveNFC extends LinearOpMode {
 
         wooble_hand.setPosition(0);
         hand_open = true;
+
+        ElapsedTime downTime = new ElapsedTime();
+        ElapsedTime upTime = new ElapsedTime();
+        List<Double>down = new ArrayList<>();
+        List<Double>up = new ArrayList<>();
+        boolean upRecording = false;
+        boolean downRecording = false;
+        double finalDownTime = 0;
+        double finalUpTime = 0;
 
         waitForStart();
         while (opModeIsActive()) {
@@ -204,6 +225,25 @@ public class VoltronsDriveNFC extends LinearOpMode {
             }
 
 
+            if (gamepad2.y && a2Button.milliseconds() > 300) {
+                if (upRecording) {
+                    finalUpTime = upTime.milliseconds();
+                    ReadWriteFile.writeFile(UpPath, up.toString() + " \n " + finalUpTime);
+                }
+                upRecording = true;
+                upTime.reset();
+            }
+
+            if (gamepad2.x && a2Button.milliseconds() > 300) {
+                if (downRecording) {
+                    finalDownTime = downTime.milliseconds();
+                    ReadWriteFile.writeFile(UpPath, down.toString() + " \n " + finalDownTime);
+                }
+                downRecording = true;
+                downTime.reset();
+            }
+
+
             if (Math.abs(gamepad2.left_stick_y) > 0 && woobleDelay.milliseconds() > 20)
             {
                 position_goal += -gamepad2.left_stick_y * 20;
@@ -217,6 +257,15 @@ public class VoltronsDriveNFC extends LinearOpMode {
 
             double error = position_goal - wooble_arm.getCurrentPosition();
             double wooble_arm_power = k_p * error;
+
+            if (upRecording) {
+                up.add(position_goal);
+            }
+
+            if (downRecording) {
+                down.add(position_goal);
+            }
+
             wooble_arm.setPower(wooble_arm_power);
             telemetry.addData("power", wooble_arm_power);
             telemetry.addData("position goal", position_goal);

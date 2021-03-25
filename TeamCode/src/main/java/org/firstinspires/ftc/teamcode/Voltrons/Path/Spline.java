@@ -14,7 +14,7 @@ public class Spline {
     List<CubicFunction> functions;
     public Point[] points;
     double[] prefixSum;
-    double totalLength;
+    public double totalLength;
 
     /**
      * Initializes a spline objects given an array of points, the beginning slope and the end slope

@@ -356,7 +356,46 @@ public class Drivetrain {
 
             dashboard.sendTelemetryPacket(packet);
 
-        } while (!(relativePosition > spline.points[spline.points.length - 1].x) && !Thread.currentThread().isInterrupted());
+        } while (relativePosition < spline.totalLength && !Thread.currentThread().isInterrupted());
+
+        idle();
+
+    }
+
+    public void followPathReverse(Spline spline, double power) {
+        // Everything should be reversed
+        double relativePosition;
+        double startingLeftPosition = Drivetrain.ticksToCm(-backLeft.getCurrentPosition());
+        double startingRightPosition = Drivetrain.ticksToCm(backRight.getCurrentPosition());
+        double startingHeading = Imu.normalizeSplineAngle(spline.getHeading(spline.totalLength - 1));
+
+        packet.put("Starting Heading", startingHeading);
+        dashboard.sendTelemetryPacket(packet);
+
+        setOrientation(power, startingHeading);
+
+        // Should have really low power to avoid overshooting. 0.5 seems right
+        do {
+
+            relativePosition = (Math.abs(Drivetrain.ticksToCm(-backLeft.getCurrentPosition()) - startingLeftPosition) + Math.abs(Drivetrain.ticksToCm(backRight.getCurrentPosition()) - startingRightPosition)) / 2.0;
+            double newHeading = Imu.normalizeSplineAngle(spline.getHeading(spline.totalLength - relativePosition));
+            double angleError = Imu.getError(imu.getAngleNormalized(), newHeading);
+            double angleCorrection = orientationPID.calculate(angleError, 0);
+
+            frontLeft.set(-power + angleCorrection); // Maybe it should change depending of direction
+            frontRight.set(-power - angleCorrection);
+            backLeft.set(-power + angleCorrection);
+            backRight.set(-power - angleCorrection);
+
+
+            packet.put("Position", relativePosition);
+            packet.put("New Heading", newHeading);
+            packet.put("Angle Error", angleError);
+            packet.put("Correction Output", angleCorrection);
+
+            dashboard.sendTelemetryPacket(packet);
+
+        } while (relativePosition < spline.totalLength && !Thread.currentThread().isInterrupted());
 
         idle();
 

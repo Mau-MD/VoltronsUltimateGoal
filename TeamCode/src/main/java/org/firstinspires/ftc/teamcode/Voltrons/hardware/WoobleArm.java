@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Voltrons.control.PIDICoeff;
 
 public class WoobleArm {
 
-    Motor arm;
+    public Motor arm;
     SimpleServo hand;
     boolean open;
     double min, max;
@@ -196,9 +196,6 @@ public class WoobleArm {
     public double getError() {
         return pid.getError();
     }
-
-
-
 
 
 
