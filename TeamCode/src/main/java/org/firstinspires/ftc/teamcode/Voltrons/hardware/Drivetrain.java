@@ -335,7 +335,7 @@ public class Drivetrain {
 
         setOrientation(power, startingHeading);
 
-        // Should have really low power to avoid overshooting
+        // Should have really low power to avoid overshooting. 0.5 seems right
         do {
 
             relativePosition = (Math.abs(Drivetrain.ticksToCm(-backLeft.getCurrentPosition()) - startingLeftPosition) + Math.abs(Drivetrain.ticksToCm(backRight.getCurrentPosition()) - startingRightPosition)) / 2.0;
