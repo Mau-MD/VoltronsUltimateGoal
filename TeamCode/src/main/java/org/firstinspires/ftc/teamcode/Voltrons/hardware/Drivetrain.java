@@ -401,6 +401,18 @@ public class Drivetrain {
 
     }
 
+    public void drive(double[] power, double time) {
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
+
+        while (elapsedTime.milliseconds() < time) {
+            frontLeft.set(power[0]); // Maybe it should change depending of direction
+            frontRight.set(power[1]);
+            backLeft.set(power[2]);
+            backRight.set(power[3]);
+        }
+        idle();
+    }
     /**
      * Converts cm to motor ticks
      * @param cm cm

@@ -119,11 +119,11 @@ public class SplineTest extends LinearOpMode {
             drive.setGyroKp(gyroKp);
 
             Point[] first = new Point[] {
-                    new Point(166,56),
+                    new Point(166, 56),
                     new Point(175, 89),
                     new Point(177, 95),
-                    new Point(210, 150),
-                    new Point(220,170)
+                    new Point(200, 150),
+                    new Point(210, 200)
             };
 
             if (gamepad1.a && aButton.milliseconds() > 40) {

@@ -25,11 +25,11 @@ public class RingPipeline extends OpenCvPipeline {
     public int ring1;
     public int ring4;
 
-    public static Point BigSquare1 = new Point(120,150);
-    public static Point BigSquare2 = new Point(150,172);
+    public static Point BigSquare1 = new Point(118,155);
+    public static Point BigSquare2 = new Point(175,200);
 
-    public static Point SmallSquare1 = new Point(120,165);
-    public static Point SmallSquare2 = new Point(150,172);
+    public static Point SmallSquare1 = new Point(118,190);
+    public static Point SmallSquare2 = new Point(175,200);
 
     @Override
     public Mat processFrame(Mat input)

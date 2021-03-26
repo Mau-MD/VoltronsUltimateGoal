@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Voltrons.OpMode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -19,7 +20,7 @@ import java.util.List;
 
 
 @Config
-@TeleOp(name="Driver NFC", group="Test")
+@TeleOp(name="Driver NFC", group="UO")
 public class VoltronsDriveNFC extends LinearOpMode {
 
     DcMotor left_front;
@@ -27,7 +28,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
     DcMotor left_back;
     DcMotor right_back;
 
-    DcMotor wooble_arm;
+    Motor wooble_arm;
     Servo wooble_hand;
 
     DcMotor intake;
@@ -49,8 +50,8 @@ public class VoltronsDriveNFC extends LinearOpMode {
     ElapsedTime a2Button = new ElapsedTime();
     ElapsedTime woobleDelay = new ElapsedTime();
 
-    File UpPath = AppUtil.getInstance().getSettingsFile("UpMovement.txt");
-    File DownPath = AppUtil.getInstance().getSettingsFile("DownMovement.txt");
+    //File UpPath = AppUtil.getInstance().getSettingsFile("UpMovement.txt");
+    //File DownPath = AppUtil.getInstance().getSettingsFile("DownMovement.txt");
 
 
     @Override
@@ -61,7 +62,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
         left_back = hardwareMap.dcMotor.get("bl");
         right_back = hardwareMap.dcMotor.get("br");
 
-        wooble_arm = hardwareMap.dcMotor.get("wa");
+        wooble_arm = new Motor(hardwareMap, "wa");
         wooble_hand = hardwareMap.servo.get("wh");
 
         intake = hardwareMap.dcMotor.get("in");
@@ -79,14 +80,15 @@ public class VoltronsDriveNFC extends LinearOpMode {
         right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        wooble_arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        wooble_arm.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         left_front.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        wooble_arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wooble_arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        wooble_arm.setInverted(true);
+        wooble_arm.resetEncoder();
+        wooble_arm.resetEncoder();
+        wooble_arm.resetEncoder();
 
         aButton.reset();
         bButton.reset();
@@ -100,9 +102,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
         int invert = 1;
 
         // PID
-        double position_goal = 0;
-
-        wooble_hand.setPosition(0);
+        double position_goal = wooble_arm.getCurrentPosition();
         hand_open = true;
 
         ElapsedTime downTime = new ElapsedTime();
@@ -225,23 +225,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
             }
 
 
-            if (gamepad2.y && a2Button.milliseconds() > 300) {
-                if (upRecording) {
-                    finalUpTime = upTime.milliseconds();
-                    ReadWriteFile.writeFile(UpPath, up.toString() + " \n " + finalUpTime);
-                }
-                upRecording = true;
-                upTime.reset();
-            }
 
-            if (gamepad2.x && a2Button.milliseconds() > 300) {
-                if (downRecording) {
-                    finalDownTime = downTime.milliseconds();
-                    ReadWriteFile.writeFile(UpPath, down.toString() + " \n " + finalDownTime);
-                }
-                downRecording = true;
-                downTime.reset();
-            }
 
 
             if (Math.abs(gamepad2.left_stick_y) > 0 && woobleDelay.milliseconds() > 20)
@@ -258,17 +242,11 @@ public class VoltronsDriveNFC extends LinearOpMode {
             double error = position_goal - wooble_arm.getCurrentPosition();
             double wooble_arm_power = k_p * error;
 
-            if (upRecording) {
-                up.add(position_goal);
-            }
 
-            if (downRecording) {
-                down.add(position_goal);
-            }
-
-            wooble_arm.setPower(wooble_arm_power);
+            wooble_arm.set(wooble_arm_power);
             telemetry.addData("power", wooble_arm_power);
             telemetry.addData("position goal", position_goal);
+            telemetry.addData("current position", wooble_arm.getCurrentPosition());
             telemetry.update();
 
         }

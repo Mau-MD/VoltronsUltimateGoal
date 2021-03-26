@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.Voltrons.OpMode.Autonomous;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +28,8 @@ import org.openftc.easyopencv.OpenCvInternalCamera2;
 
 import java.sql.Driver;
 
+@Config
+@Autonomous(name="Final Autonomous", group="UO")
 public class FinalAutonomous extends LinearOpMode {
 
     public static double wobbleHandMin = 0;
@@ -39,7 +43,8 @@ public class FinalAutonomous extends LinearOpMode {
 
     public static PIDICoeff armCoeff = new PIDICoeff(0.0008,0.0003,0,500);
     public static PIDICoeff turnCoeff = new PIDICoeff(0.07,0, 0,0);
-    public static double gyroKp = 0.01;
+    public static PIDICoeff encoderCoeff = new PIDICoeff(0.0001,0,0,0);
+    public static double gyroKp = 0.05;
 
     OpenCvCamera phoneCam;
     RingPipeline visionPipeline;
@@ -106,8 +111,11 @@ public class FinalAutonomous extends LinearOpMode {
         backRight.setInverted(false);
 
         wobbleArm.resetEncoder();
+        wobbleArm.setInverted(true);
+
         PID wobblePID = new PID(armCoeff);
         PID turnPID = new PID(turnCoeff);
+        PID encoderPID = new PID(encoderCoeff);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
         Belt belt = new Belt(beltDown, betlUp);
@@ -125,109 +133,134 @@ public class FinalAutonomous extends LinearOpMode {
 
         drive.setOrientationPID(turnPID);
         drive.setGyroKp(gyroKp);
+        drive.setEncoderPID(encoderPID);
+
+        drive.setDashboard(FtcDashboard.getInstance());
+        arm.setDashboard(FtcDashboard.getInstance());
 
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
 
         waitForStart();
 
+        int rings;
 
         if (opModeIsActive()) {
 
+            if (visionPipeline.ring1 == 0 && visionPipeline.ring4 == 0) {
+                rings = 4;
+            }
+            else if (visionPipeline.ring1 == 0) {
+                rings = 1;
+            }
+            else {
+                rings = 0;
+            }
+
             Point[] first = new Point[]{
-                    new Point(166, 56),
-                    new Point(175, 89),
-                    new Point(177, 95),
-                    new Point(210, 150),
-                    new Point(220, 170)
+                    new Point(170, 50),
+                    new Point(175, 70),
+                    new Point(190, 95),
+                    new Point(200, 150),
+                    new Point(210, 200)
             };
 
             Spline firstSpline = new Spline(first, 5, 5);
             drive.followPath(firstSpline, 0.5);
 
-            sleep(1000);
+            if (rings == 0) {
+                sleep(500);
 
-            drive.setOrientation(0.8, 0);
+                drive.setOrientation(0.8, 0);
 
-            sleep(1000);
+                sleep(200);
 
-            arm.resetSum();
-            arm.setGoal(B);
-            timer.reset();
+                drive.drive(new double[]{-0.5, -0.5, -0.5, -0.5}, 500);
+                drive.drive(new double[]{0.5, -0.5, -0.5, 0.5}, 1000);
 
-            while (timer.milliseconds() < 5000) {
-                arm.goToGoal();
+                sleep(500);
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+
+                while (timer.milliseconds() < 5000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(2000);
+
+                drive.drive(new double[]{0.5, -0.5, -0.5, 0.5}, 1000);
+
+            }
+            else if (rings == 1) {
+                sleep(500);
+
+                drive.setOrientation(0.8, 180);
+
+                sleep(200);
+
+                drive.drive(new double[]{0.5, 0.5, 0.5, 0.5}, 3000);
+                drive.drive(new double[]{-0.5, 0.5, 0.5, -0.5}, 500);
+
+                sleep(500);
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+
+                while (timer.milliseconds() < 5000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(2000);
+
+                drive.drive(new double[]{0.5, -0.5, -0.5, 0.5}, 500);
+                drive.drive(new double[]{-0.5, -0.5, -0.5, -0.5}, 2000);
+
+            }
+            else {
+                sleep(500);
+
+                drive.setOrientation(0.8, 0);
+
+                sleep(200);
+
+                drive.drive(new double[]{-0.5, -0.5, -0.5, -0.5}, 5500);
+                drive.drive(new double[]{0.5, -0.5, -0.5, 0.5}, 1000);
+
+                sleep(500);
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+
+                while (timer.milliseconds() < 2000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(1000);
+
+                drive.drive(new double[]{0.5, -0.5, -0.5, 0.5}, 1000);
+                drive.drive(new double[]{0.5, 0.5, 0.5, 0.5}, 5000);
             }
 
-            arm.arm.set(0);
-
-            arm.openHand();
-
-            sleep(2000);
-
-            drive.driveEncoderGyro(new double[]{-0.5, 0.5, 0.5, -10.5}, 0, 30, 0.1);
-
-            sleep(1000);
-
-            drive.setOrientation(0.8, 180);
-
-            sleep(1000);
-
-            Point[] second = new Point[]{
-                    new Point(120, 60),
-                    new Point(150, 50),
-                    new Point(185, 63),
-                    new Point(205, 150),
-                    new Point(210, 190)
-            };
-
-            Spline secondSpline = new Spline(second, 5, 5);
-            drive.followPathReverse(secondSpline, 0.5);
-
-
-            sleep(1000);
-
-            arm.closeHand();
-
-            sleep(2000);
-
-            arm.resetSum();
-            arm.setGoal(A);
-            timer.reset();
-
-            while (timer.milliseconds() < 5000) {
-                arm.goToGoal();
-            }
-
-            arm.arm.set(0);
-
-            sleep(1000);
-
-            drive.followPath(secondSpline, 0.5);
-
-            sleep(1000);
-
-            drive.setOrientation(0.8, 0);
-
-            sleep(1000);
-
-            arm.resetSum();
-            arm.setGoal(B);
-            timer.reset();
-
-            while (timer.milliseconds() < 5000) {
-                arm.goToGoal();
-            }
-
-            arm.arm.set(0);
-
-            arm.openHand();
-
-            sleep(2000);
-
-            drive.driveEncoderGyro(new double[]{-0.5, 0.5, 0.5, -10.5}, 0, 30, 0.1);
-
-
+            idle();
         }
     }
 

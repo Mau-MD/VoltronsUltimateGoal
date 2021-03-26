@@ -83,7 +83,10 @@ public class ArmTest extends LinearOpMode {
         backLeft.setInverted(false);
         backRight.setInverted(false);
 
+        wobbleArm.setInverted(true);
         wobbleArm.resetEncoder();
+
+
         PID wobblePID = new PID(armCoeff);
 
         Drivetrain drive = new Drivetrain(frontLeft, frontRight, backLeft, backRight, imu);
@@ -103,7 +106,6 @@ public class ArmTest extends LinearOpMode {
 
         arm.setDashboard(FtcDashboard.getInstance());
         arm.setGoal(0);
-
 
         while (opModeIsActive()) {
 
