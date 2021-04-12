@@ -2,12 +2,17 @@ package org.firstinspires.ftc.teamcode.Voltrons.Vision;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import org.ejml.sparse.csc.mult.ImplMultiplicationWithSemiRing_DSCC;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Config
 public class RingPipeline extends OpenCvPipeline {
@@ -25,11 +30,11 @@ public class RingPipeline extends OpenCvPipeline {
     public int ring1;
     public int ring4;
 
-    public static Point BigSquare1 = new Point(118,155);
-    public static Point BigSquare2 = new Point(175,200);
+    public static Point startingPoint = new Point(118, 155);
+    public static Point endPoint = new Point(175, 200);
+    public static double ringYDelimiter = 190;
 
-    public static Point SmallSquare1 = new Point(118,190);
-    public static Point SmallSquare2 = new Point(175,200);
+    public static double minArea = 1000;
 
     @Override
     public Mat processFrame(Mat input)
@@ -40,94 +45,103 @@ public class RingPipeline extends OpenCvPipeline {
         Core.extractChannel(YCrCb,Cb,2);
         Imgproc.threshold(Cb,tholdMat,150,255,Imgproc.THRESH_BINARY_INV);
 
-        // Drawing Points
-        int BigSquarePointX = (int)((BigSquare1.x + BigSquare2.x) / 2);
-        int BigSquarePointY = (int)((BigSquare1.y + SmallSquare1.y) / 2);
 
-        int SmallSquarePointX = (int)((SmallSquare1.x + SmallSquare2.x) / 2);
-        int SmallSquarePointY = (int)((SmallSquare1.y + SmallSquare2.y) / 2);
 
         // Point BigSquarePoint = new Point((int)((BigSquare1.x + BigSqare2.x) / 2),(int)((BigSquare1.y + SmallSquare1.y) / 2));
         // Point SmallSquarePoint = new Point((int)((SmallSquare1.x + SmallSquare2.x) / 2),(int)((SmallSquare1.y + SmallSquare2.y) / 2));
 
-        double bigSquarePointValues[] = tholdMat.get(BigSquarePointY,BigSquarePointX);
-        double smallSquarePointValues[] = tholdMat.get(SmallSquarePointY,SmallSquarePointX);
+        // Large Region
+        double largeRegionBlackPixels = 0, largeRegionWhitePixels = 0;
+        for (int y = (int) startingPoint.y; y < ringYDelimiter; y++) {
+            for (int x = (int) startingPoint.x; x < endPoint.x; x++) {
+                if (tholdMat.get(y, x)[0] == 0) { // Theres a black pixel == ring there
+                    largeRegionBlackPixels++;
+                }
+                else {
+                    largeRegionWhitePixels++;
+                }
+            }
+        }
 
-        ring4 = (int) bigSquarePointValues[0];
-        ring1 = (int) smallSquarePointValues[0];
+        double largeRegionTotal = largeRegionBlackPixels + largeRegionWhitePixels;
+        double largeRegionBlackAverage = largeRegionBlackPixels / largeRegionTotal;
+        double largeRegionWhiteAverage = largeRegionWhitePixels / largeRegionTotal;
 
-        // Big Square
+        // Small Region
+        double smallRegionBlackPixels = 0, smallRegionWhitePixels = 0;
+        for (int y = (int) ringYDelimiter; y < endPoint.y; y++) {
+            for (int x = (int) startingPoint.x; x < endPoint.x; x++) {
+                if (tholdMat.get(y, x)[0] == 0) { // There's a black pixel == ring there
+                    smallRegionBlackPixels++;
+                }
+                else {
+                    smallRegionWhitePixels++;
+                }
+            }
+        }
+
+        double smallRegionTotal = smallRegionBlackPixels + smallRegionWhitePixels;
+        double smallRegionBlackAverage = smallRegionBlackPixels / smallRegionTotal;
+        double smallRegionWhiteAverage = smallRegionWhitePixels / smallRegionTotal;
+
+
+        ring4 = 255;
+        ring1 = 255;
+
+        if (largeRegionBlackAverage > largeRegionWhiteAverage) {
+            // Four Ring On
+            ring4 = 0;
+        }
+
+        if (smallRegionBlackPixels > smallRegionWhiteAverage) {
+            // First Rin On
+            ring1 = 0;
+        }
+
+
         Imgproc.rectangle(
                 input,
-                BigSquare1,
-                BigSquare2,
+                startingPoint,
+                endPoint,
                 GRAY,
                 1
         );
 
-        // Small Square
         Imgproc.rectangle(
                 input,
-                SmallSquare1,
-                SmallSquare2,
+                new Point(startingPoint.x, ringYDelimiter),
+                endPoint,
                 GRAY,
                 1
         );
 
-        // Big Square Point
-        Imgproc.circle(
-                input,
-                new Point(BigSquarePointX,BigSquarePointY),
-                2,
-                GRAY,
-                1
-        );
-
-        // Small Square Point
-        Imgproc.circle(
-                input,
-                new Point(SmallSquarePointX,SmallSquarePointY),
-                2,
-                GRAY,
-                1
-        );
-
-        // Change colors if the pipeline detected something
-
-        if (ring1 == 0 && ring4 == 0)
-        {
+        if (ring1 == 0 && ring4 == 0) {
             Imgproc.rectangle(
                     input,
-                    BigSquare1,
-                    BigSquare2,
+                    startingPoint,
+                    endPoint,
                     GREEN,
                     1
             );
-            Imgproc.circle(
+
+            Imgproc.rectangle(
                     input,
-                    new Point(BigSquarePointX,BigSquarePointY),
-                    2,
+                    new Point(startingPoint.x, ringYDelimiter),
+                    endPoint,
                     GREEN,
                     1
             );
         }
-        if (ring1 == 0)
-        {
+        else if (ring1 == 0) {
             Imgproc.rectangle(
                     input,
-                    SmallSquare1,
-                    SmallSquare2,
-                    GREEN,
-                    1
-            );
-            Imgproc.circle(
-                    input,
-                    new Point(SmallSquarePointX,SmallSquarePointY),
-                    2,
+                    new Point(startingPoint.x, ringYDelimiter),
+                    endPoint,
                     GREEN,
                     1
             );
         }
+
 
         return input;
     }

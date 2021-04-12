@@ -116,7 +116,6 @@ public class VoltronsDriveNFC extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-
             // invertMotors();
             right_front.setPower((-gamepad1.left_stick_y - gamepad1.left_stick_x + (gamepad1.right_stick_x * invert)) * (adjust/10.0));
             left_front.setPower((-gamepad1.left_stick_y + gamepad1.left_stick_x - (gamepad1.right_stick_x * invert)) * (adjust/10.0));
@@ -247,6 +246,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
             telemetry.addData("power", wooble_arm_power);
             telemetry.addData("position goal", position_goal);
             telemetry.addData("current position", wooble_arm.getCurrentPosition());
+
             telemetry.update();
 
         }
