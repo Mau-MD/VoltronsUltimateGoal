@@ -114,7 +114,7 @@ public class VoltronsDrive1Player extends LinearOpMode {
         double finalDownTime = 0;
         double finalUpTime = 0;
 
-        double launcherPower = 0.35;
+        double launcherPower = 0.40;
 
         waitForStart();
         while (opModeIsActive()) {
@@ -196,12 +196,12 @@ public class VoltronsDrive1Player extends LinearOpMode {
             // Launcher Gamepead 1
 
 
-            if (gamepad1.left_stick_button && a2Button.milliseconds() > 100) {
+            if (gamepad1.left_stick_button && a2Button.milliseconds() > 400) {
                 launcherPower -= 0.05;
                 a2Button.reset();
             }
 
-            if (gamepad1.right_stick_button && a2Button.milliseconds() > 100) {
+            if (gamepad1.right_stick_button && a2Button.milliseconds() > 400) {
                 launcherPower += 0.05;
                 a2Button.reset();
             }
@@ -232,7 +232,7 @@ public class VoltronsDrive1Player extends LinearOpMode {
                 {
                     wooble_hand.setPosition(1);
                     hand_open = true;
-                } ;
+                }
                 a2Button.reset();
             }
 

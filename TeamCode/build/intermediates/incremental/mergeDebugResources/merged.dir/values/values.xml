@@ -107,6 +107,7 @@
     <attr format="boolean" name="isLightTheme"/>
     <attr format="color" name="lineBright"/>
     <attr format="color" name="lineLight"/>
+    <attr format="reference" name="nestedScrollViewStyle"/>
     <attr format="color" name="textBright"/>
     <attr format="color" name="textLight"/>
     <attr format="color" name="textMedium"/>
@@ -3601,6 +3602,13 @@
           <enum name="back" value="99"/>
           <enum name="front" value="98"/>
        </attr>
+    </declare-styleable>
+    <declare-styleable name="Capability">
+        <!-- Resource reference to the string array of query patterns for a custom capability. -->
+        <attr format="reference" name="queryPatterns"/>
+        <!-- Indicates whether a parameter in a capability template can only contain a matched
+             shortcut id and not an arbitrary string. -->
+        <attr format="boolean" name="shortcutMatchRequired"/>
     </declare-styleable>
     <declare-styleable name="ColorListPreference">
         <attr format="reference" name="colors"/>

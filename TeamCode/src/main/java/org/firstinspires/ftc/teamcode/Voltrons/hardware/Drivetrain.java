@@ -151,6 +151,26 @@ public class Drivetrain {
         driveEncoderGyro(power, angle, goal);
     }
 
+
+    public void driveEncoderSimple(double[] power, double goal) {
+        double startingLeftPosition = -backLeft.getCurrentPosition();
+        double startingRightPosition = backRight.getCurrentPosition();
+        double ticksGoal = Drivetrain.cmToTicks(goal);
+
+        while (!Thread.currentThread().isInterrupted()) {
+            double relativePosition = (Math.abs(-backLeft.getCurrentPosition() - startingLeftPosition) + Math.abs(backRight.getCurrentPosition() - startingRightPosition)) / 2.0;
+
+            frontLeft.set(power[0]);
+            frontRight.set(power[1]);
+            backLeft.set(power[2]);
+            backRight.set(power[3]);
+
+            if (relativePosition > ticksGoal) {
+                break;
+            }
+        }
+
+    }
     /**
      * Drives the robot following an specific angle traveling an specified amount of centimeters it requires to have set
      * a gyro PIDF controller and a encoder PIDF controller

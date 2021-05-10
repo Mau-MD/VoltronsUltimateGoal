@@ -53,6 +53,7 @@ public class VoltronsDriveNFC extends LinearOpMode {
     //File UpPath = AppUtil.getInstance().getSettingsFile("UpMovement.txt");
     //File DownPath = AppUtil.getInstance().getSettingsFile("DownMovement.txt");
 
+    double launchPower = 0.40;
 
     @Override
     public void runOpMode() {
@@ -81,6 +82,9 @@ public class VoltronsDriveNFC extends LinearOpMode {
 
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         wooble_arm.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        right_launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        left_launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         left_front.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -191,21 +195,32 @@ public class VoltronsDriveNFC extends LinearOpMode {
                 belt_up.setPower(0);
                 belt_down.setPower(0);
             }
-            // Launcher Gamepead 1
 
-            left_launcher.setPower(-gamepad1.right_trigger);
-            right_launcher.setPower(gamepad1.right_trigger);
-
-            left_launcher.setPower(gamepad1.left_trigger);
-            right_launcher.setPower(-gamepad1.left_trigger);
 
             // Launcher Gamepad 2
 
-            left_launcher.setPower(-gamepad2.right_trigger);
-            right_launcher.setPower(gamepad2.right_trigger);
+            if (gamepad2.left_stick_button && a2Button.milliseconds() > 400) {
+                launchPower -= 0.05;
+                a2Button.reset();
+            }
 
-            left_launcher.setPower(gamepad1.left_trigger);
-            right_launcher.setPower(-gamepad1.left_trigger);
+            if (gamepad2.right_stick_button && a2Button.milliseconds() > 400) {
+                launchPower += 0.05;
+                a2Button.reset();
+            }
+
+            if (gamepad2.right_trigger > 0) {
+                left_launcher.setPower(launchPower);
+                right_launcher.setPower(-launchPower);
+            }
+            else if (gamepad2.left_trigger > 0) {
+                left_launcher.setPower(-launchPower);
+                right_launcher.setPower(launchPower);
+            }
+            else {
+                left_launcher.setPower(0);
+                right_launcher.setPower(0);
+            }
 
             // Wooble
             if (gamepad2.a && a2Button.milliseconds() > 300)

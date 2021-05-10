@@ -30,9 +30,9 @@ public class RingPipeline extends OpenCvPipeline {
     public int ring1;
     public int ring4;
 
-    public static Point startingPoint = new Point(118, 155);
-    public static Point endPoint = new Point(175, 200);
-    public static double ringYDelimiter = 190;
+    public static Point startingPoint = new Point(130, 134);
+    public static Point endPoint = new Point(175, 170);
+    public static double ringYDelimiter = 157;
 
     public static double minArea = 1000;
 
