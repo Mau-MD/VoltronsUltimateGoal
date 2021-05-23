@@ -48,20 +48,15 @@ public class Autonomousv2 extends LinearOpMode {
 
     public static double power1 = 0.9;
     public static double power2 = 0.9;
-mauricio5
 
+    public static double distanceA = 140;
+    public static double distanceB = 20;
+    public static double distanceZeroRings = 20;
+    public static double distanceOneRing = 100;
+    public static double distanceFourRings = 150;
 
-
-
-
-    §
-
-
-
-
-    
-
-    public static long launchTime = 5000;
+    public static double launcPower = 0.35;
+    public static long launchTime = 7000;
 
     DcMotor left_launcher;
     DcMotor right_launcher;
@@ -196,10 +191,12 @@ mauricio5
                 rings = 0;
             }
 
-            left_launcher.setPower(0.4);
-            right_launcher.setPower(-0.4);
+            left_launcher.setPower(launcPower);
+            right_launcher.setPower(-launcPower);
 
             drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, distanceA);
+            drive.driveEncoderSimple(new double[]{power1, -power1, -power1, power1}, distanceB);
+
             drive.idle();
 
             sleep(500);
@@ -207,7 +204,7 @@ mauricio5
             // Corregir Orientacion
             drive.setOrientation(0.8, 180);
 
-            sleep(500);
+            sleep(1500);
 
             // Prender belt e intake
 
@@ -215,18 +212,99 @@ mauricio5
             belt_up.setPower(1);
             intake.setPower(-1);
 
-
             timer.reset();
             while (timer.milliseconds() < launchTime) {
                 telemetry.addLine("im shooting lol");
+                telemetry.update();
             }
-
-
-            // Apagar belt e intake
 
             belt_down.setPower(0);
             belt_up.setPower(0);
             intake.setPower(0);
+            left_launcher.setPower(0);
+            right_launcher.setPower(0);
+
+            drive.driveEncoderSimple(new double[]{power1, -power1, -power1, power1}, distanceB);
+
+            if (rings == 0) {
+                drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, distanceZeroRings);
+                drive.setOrientation(0.8, 0);
+                drive.idle();
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+                while (timer.milliseconds() < 3000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(2000);
+
+                drive.idle();
+
+                // Se ira a la izquierda
+                drive.driveEncoderSimple(new double[]{power1, -power1, -power1, power1}, distanceB);
+
+            }
+            else if (rings == 1) {
+                drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, distanceOneRing);
+
+                drive.idle();
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+                while (timer.milliseconds() < 3000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(2000);
+
+                drive.idle();
+
+                // Se ira a la izquierda
+                drive.driveEncoderSimple(new double[]{power1, -power1, -power1, power1}, distanceB);
+                drive.driveEncoderSimple(new double[]{-power1, -power1, -power1, -power1}, distanceOneRing - 20);
+
+            }
+            else {
+                drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, distanceFourRings);
+                drive.setOrientation(0.8, 0);
+                drive.idle();
+
+                arm.resetSum();
+                arm.setGoal(650);
+                timer.reset();
+
+                while (timer.milliseconds() < 3000) {
+                    arm.goToGoal();
+                }
+
+                arm.arm.set(0);
+
+                arm.openHand();
+
+                sleep(2000);
+
+                drive.idle();
+
+                // Se ira a la izquierda
+                drive.driveEncoderSimple(new double[]{power1, -power1, -power1, power1}, distanceB);
+                drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, distanceFourRings - 80);
+                drive.driveEncoderSimple(new double[]{-power1, power1, power1, -power1}, distanceB);
+                drive.driveEncoderSimple(new double[]{power1, power1, power1, power1}, 40);
+
+            }
 
             drive.idle();
         }

@@ -221,7 +221,7 @@ public class VoltronsDrive1Player extends LinearOpMode {
 
 
             // Wooble
-            if (gamepad2.x && a2Button.milliseconds() > 300)
+            if (gamepad1.x && a2Button.milliseconds() > 300)
             {
                 if (hand_open)
                 {
