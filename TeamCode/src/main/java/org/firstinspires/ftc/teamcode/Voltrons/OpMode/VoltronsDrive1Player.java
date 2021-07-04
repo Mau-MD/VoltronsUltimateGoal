@@ -114,7 +114,7 @@ public class VoltronsDrive1Player extends LinearOpMode {
         double finalDownTime = 0;
         double finalUpTime = 0;
 
-        double launcherPower = 0.40;
+        double launcherPower = 0.35;
 
         waitForStart();
         while (opModeIsActive()) {
