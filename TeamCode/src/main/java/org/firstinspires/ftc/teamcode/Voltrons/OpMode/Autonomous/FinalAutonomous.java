@@ -105,8 +105,9 @@ public class FinalAutonomous extends LinearOpMode {
         backLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        frontLeft.setInverted(true);
-        frontRight.setInverted(true);
+        // I changed these
+        frontLeft.setInverted(false);  // true
+        frontRight.setInverted(false); // true
         backLeft.setInverted(false);
         backRight.setInverted(false);
 

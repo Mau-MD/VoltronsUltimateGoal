@@ -148,7 +148,7 @@
 88        android:allowBackup="true"
 88-->[:FtcRobotController] /Users/maudieguez/Documents/VoltronsProgramming/VoltronsUltimateGoal/FtcRobotController/build/intermediates/library_manifest/debug/AndroidManifest.xml:15:9-35
 89        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-89-->[androidx.core:core:1.5.0-alpha05] /Users/maudieguez/.gradle/caches/transforms-2/files-2.1/78bfb47c9de3659ec273d73c4d4597a2/core-1.5.0-alpha05/AndroidManifest.xml:24:18-86
+89-->[androidx.core:core:1.7.0-alpha01] /Users/maudieguez/.gradle/caches/transforms-2/files-2.1/ca132ebb6026aa4d74c1b87d1e4b827f/core-1.7.0-alpha01/AndroidManifest.xml:24:18-86
 90        android:debuggable="true"
 91        android:extractNativeLibs="true"
 91-->[:FtcRobotController] /Users/maudieguez/Documents/VoltronsProgramming/VoltronsUltimateGoal/FtcRobotController/build/intermediates/library_manifest/debug/AndroidManifest.xml:16:9-41

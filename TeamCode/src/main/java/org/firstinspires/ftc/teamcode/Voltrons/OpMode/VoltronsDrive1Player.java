@@ -66,6 +66,8 @@ public class VoltronsDrive1Player extends LinearOpMode {
         belt_down = hardwareMap.crservo.get("bd");
         belt_up = hardwareMap.crservo.get("bu");
 
+        belt_up.setDirection(DcMotorSimple.Direction.REVERSE);
+
         // 1
         right_launcher = hardwareMap.dcMotor.get("rl");
         // 0
@@ -82,7 +84,7 @@ public class VoltronsDrive1Player extends LinearOpMode {
         right_launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         left_launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        left_front.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_back.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front.setDirection(DcMotorSimple.Direction.REVERSE);
 
         wooble_arm.setInverted(true);
@@ -105,14 +107,6 @@ public class VoltronsDrive1Player extends LinearOpMode {
         double position_goal = wooble_arm.getCurrentPosition();
         hand_open = true;
 
-        ElapsedTime downTime = new ElapsedTime();
-        ElapsedTime upTime = new ElapsedTime();
-        List<Double>down = new ArrayList<>();
-        List<Double>up = new ArrayList<>();
-        boolean upRecording = false;
-        boolean downRecording = false;
-        double finalDownTime = 0;
-        double finalUpTime = 0;
 
         double launcherPower = 0.35;
 
@@ -143,17 +137,17 @@ public class VoltronsDrive1Player extends LinearOpMode {
             {
                 if (invert == 1)
                 {
-                    left_front.setDirection(DcMotorSimple.Direction.FORWARD);
+                    left_front.setDirection(DcMotorSimple.Direction.REVERSE);
                     right_front.setDirection(DcMotorSimple.Direction.FORWARD);
                     left_back.setDirection(DcMotorSimple.Direction.REVERSE);
-                    right_back.setDirection(DcMotorSimple.Direction.REVERSE);
+                    right_back.setDirection(DcMotorSimple.Direction.FORWARD);
                     invert = -1;
                 }
                 else {
-                    left_front.setDirection(DcMotorSimple.Direction.REVERSE);
+                    left_front.setDirection(DcMotorSimple.Direction.FORWARD);
                     right_front.setDirection(DcMotorSimple.Direction.REVERSE);
                     left_back.setDirection(DcMotorSimple.Direction.FORWARD);
-                    right_back.setDirection(DcMotorSimple.Direction.FORWARD);
+                    right_back.setDirection(DcMotorSimple.Direction.REVERSE);
                     invert = 1;
                 }
                 yButton.reset();
@@ -207,12 +201,12 @@ public class VoltronsDrive1Player extends LinearOpMode {
             }
 
             if (gamepad1.right_trigger > 0) {
-                left_launcher.setPower(launcherPower);
-                right_launcher.setPower(-launcherPower);
-            }
-            else if (gamepad1.left_trigger > 0) {
                 left_launcher.setPower(-launcherPower);
                 right_launcher.setPower(launcherPower);
+            }
+            else if (gamepad1.left_trigger > 0) {
+                left_launcher.setPower(launcherPower);
+                right_launcher.setPower(-launcherPower);
             }
             else {
                 left_launcher.setPower(0);

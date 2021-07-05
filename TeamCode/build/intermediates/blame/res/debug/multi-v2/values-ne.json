@@ -4,7 +4,7 @@
             "outputFile": "/Users/maudieguez/Documents/VoltronsProgramming/VoltronsUltimateGoal/TeamCode/build/intermediates/incremental/mergeDebugResources/merged.dir/values-ne/values-ne.xml",
             "map": [
                 {
-                    "source": "/Users/maudieguez/.gradle/caches/transforms-2/files-2.1/502eb2d5499529f8a9cc24ba39cfeb49/core-1.6.0-alpha02/res/values-ne/values-ne.xml",
+                    "source": "/Users/maudieguez/.gradle/caches/transforms-2/files-2.1/ca132ebb6026aa4d74c1b87d1e4b827f/core-1.7.0-alpha01/res/values-ne/values-ne.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

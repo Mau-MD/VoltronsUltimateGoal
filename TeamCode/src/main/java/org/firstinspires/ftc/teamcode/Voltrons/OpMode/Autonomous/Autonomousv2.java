@@ -82,11 +82,11 @@ public class Autonomousv2 extends LinearOpMode {
 
         FtcDashboard.getInstance().startCameraStream(phoneCam,60);
 
-        // Drivetrain Motors
-        Motor frontLeft = new Motor(hardwareMap, "fl", Motor.GoBILDA.RPM_117);
-        Motor frontRight = new Motor(hardwareMap, "fr", Motor.GoBILDA.RPM_117);
-        Motor backLeft = new Motor(hardwareMap, "bl", Motor.GoBILDA.RPM_117);
-        Motor backRight = new Motor(hardwareMap, "br", Motor.GoBILDA.RPM_117);
+        // Drivetrain Motor
+        Motor frontLeft = new Motor(hardwareMap, "fl", 537.6, 340);
+        Motor frontRight = new Motor(hardwareMap, "fr", 537.6,340);
+        Motor backLeft = new Motor(hardwareMap, "bl", 537.6,340);
+        Motor backRight = new Motor(hardwareMap, "br", 537.6,340);
 
         // Wobble Motors
         Motor wobbleArm = new Motor(hardwareMap, "wa");
@@ -100,8 +100,8 @@ public class Autonomousv2 extends LinearOpMode {
         belt_up = hardwareMap.crservo.get("bu");
 
         // Launcher Motors
-        Motor leftLauncher = new Motor(hardwareMap, "ll", Motor.GoBILDA.RPM_312);
-        Motor rightLauncher = new Motor(hardwareMap, "rl", Motor.GoBILDA.RPM_312);
+        Motor leftLauncher = new Motor(hardwareMap, "ll");
+        Motor rightLauncher = new Motor(hardwareMap, "rl");
 
         // 1
         right_launcher = hardwareMap.dcMotor.get("rl");
